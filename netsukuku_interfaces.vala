@@ -23,7 +23,7 @@ AddressManager addr
  NeighborhoodManager neighborhood_manager
   void here_i_am(INeighborhoodNodeID my_id, string mac, string nic_addr)
   void request_arc(INeighborhoodNodeID my_id, string mac, string nic_addr) throws NeighborhoodRequestArcError
-  void expect_ping(int guid) throws NeighborhoodUnmanagedDeviceError
+  uint16 expect_ping(string guid, uint16 peer_port) throws NeighborhoodUnmanagedDeviceError
   void remove_arc(INeighborhoodNodeID my_id, string mac, string nic_addr)
 Errors
  NeighborhoodRequestArcError(NOT_SAME_NETWORK,TOO_MANY_ARCS,TWO_ARCS_ON_COLLISION_DOMAIN,GENERIC)

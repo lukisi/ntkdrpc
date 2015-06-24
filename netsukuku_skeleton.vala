@@ -28,7 +28,7 @@ namespace Netsukuku
         {
             public abstract void here_i_am(INeighborhoodNodeID my_id, string mac, string nic_addr, CallerInfo? caller=null);
             public abstract void request_arc(INeighborhoodNodeID my_id, string mac, string nic_addr, CallerInfo? caller=null) throws NeighborhoodRequestArcError;
-            public abstract void expect_ping(int guid, CallerInfo? caller=null) throws NeighborhoodUnmanagedDeviceError;
+            public abstract uint16 expect_ping(string guid, uint16 peer_port, CallerInfo? caller=null) throws NeighborhoodUnmanagedDeviceError;
             public abstract void remove_arc(INeighborhoodNodeID my_id, string mac, string nic_addr, CallerInfo? caller=null);
         }
 
@@ -207,22 +207,38 @@ namespace Netsukuku
                     }
                     else if (m_name == "addr.neighborhood_manager.expect_ping")
                     {
-                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+                        if (args.size != 2) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
 
                         // arguments:
-                        int arg0;
+                        string arg0;
+                        uint16 arg1;
                         // position:
                         int j = 0;
                         {
-                            // deserialize arg0 (int guid)
+                            // deserialize arg0 (string guid)
                             string arg_name = "guid";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                arg0 = read_argument_string_notnull(args[j]);
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg1 (uint16 peer_port)
+                            string arg_name = "peer_port";
                             string doing = @"Reading argument '$(arg_name)' for $(m_name)";
                             try {
                                 int64 val;
                                 val = read_argument_int64_notnull(args[j]);
-                                if (val > int.MAX || val < int.MIN)
-                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
-                                arg0 = (int)val;
+                                if (val > uint16.MAX || val < uint16.MIN)
+                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of uint16");
+                                arg1 = (uint16)val;
                             } catch (HelperNotJsonError e) {
                                 critical(@"Error parsing JSON for argument: $(e.message)");
                                 critical(@" method-name: $(m_name)");
@@ -234,8 +250,8 @@ namespace Netsukuku
                         }
 
                         try {
-                            addr.neighborhood_manager.expect_ping(arg0, caller_info);
-                            ret = prepare_return_value_null();
+                            uint16 result = addr.neighborhood_manager.expect_ping(arg0, arg1, caller_info);
+                            ret = prepare_return_value_int64(result);
                         } catch (NeighborhoodUnmanagedDeviceError e) {
                             string code = "";
                             if (e is NeighborhoodUnmanagedDeviceError.GENERIC) code = "GENERIC";
