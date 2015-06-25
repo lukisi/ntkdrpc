@@ -70,6 +70,7 @@ libntkdrpc_la_LIBADD = \
 vapidir = $(datadir)/vala/vapi
 dist_vapi_DATA = \
 	ntkdrpc.vapi \
+	ntkdrpc.deps \
 	$(NULL)
 
 include_HEADERS = \
