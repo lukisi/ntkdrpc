@@ -51,6 +51,8 @@ namespace Netsukuku
 
     public interface INeighborhoodNodeID : Object
     {
+        public abstract bool i_neighborhood_equals(INeighborhoodNodeID other);
+        public abstract bool i_neighborhood_is_on_same_network(INeighborhoodNodeID other);
     }
 
     public class UnicastID : Object, Json.Serializable, ISerializable
