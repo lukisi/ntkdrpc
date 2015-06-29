@@ -134,22 +134,25 @@ namespace Netsukuku
             }
         }
 
-        public IAddressManagerStub get_addr_broadcast(string dev, uint16 port, BroadcastID broadcast_id, IAckCommunicator? notify_ack=null)
+        public IAddressManagerStub get_addr_broadcast
+        (Gee.Collection<string> devs, uint16 port, BroadcastID broadcast_id, IAckCommunicator? notify_ack=null)
         {
-            return new AddressManagerBroadcastRootStub(dev, port, broadcast_id, notify_ack);
+            return new AddressManagerBroadcastRootStub(devs, port, broadcast_id, notify_ack);
         }
 
         internal class AddressManagerBroadcastRootStub : Object, IAddressManagerStub
         {
             private string s_broadcast_id;
-            private string dev;
+            private Gee.Collection<string> devs;
             private uint16 port;
             private IAckCommunicator? notify_ack;
             private NeighborhoodManagerRemote _neighborhood_manager;
-            public AddressManagerBroadcastRootStub(string dev, uint16 port, BroadcastID broadcast_id, IAckCommunicator? notify_ack=null)
+            public AddressManagerBroadcastRootStub
+            (Gee.Collection<string> devs, uint16 port, BroadcastID broadcast_id, IAckCommunicator? notify_ack=null)
             {
                 s_broadcast_id = prepare_direct_object(broadcast_id);
-                this.dev = dev;
+                this.devs = new ArrayList<string>();
+                this.devs.add_all(devs);
                 this.port = port;
                 this.notify_ack = notify_ack;
                 _neighborhood_manager = new NeighborhoodManagerRemote(this.call);
@@ -162,7 +165,7 @@ namespace Netsukuku
 
             private string call(string m_name, Gee.List<string> arguments) throws ZCDError, StubError
             {
-                return call_broadcast_udp(m_name, arguments, dev, port, s_broadcast_id, notify_ack);
+                return call_broadcast_udp(m_name, arguments, devs, port, s_broadcast_id, notify_ack);
             }
         }
 
