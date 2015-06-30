@@ -414,7 +414,7 @@ namespace Netsukuku
 
         public class UnicastCallerInfo : CallerInfo
         {
-            internal UnicastCallerInfo(string dev, string peer_address, UnicastID unicastid)
+            public UnicastCallerInfo(string dev, string peer_address, UnicastID unicastid)
             {
                 this.dev = dev;
                 this.peer_address = peer_address;
@@ -427,7 +427,7 @@ namespace Netsukuku
 
         public class BroadcastCallerInfo : CallerInfo
         {
-            internal BroadcastCallerInfo(string dev, string peer_address, BroadcastID broadcastid)
+            public BroadcastCallerInfo(string dev, string peer_address, BroadcastID broadcastid)
             {
                 this.dev = dev;
                 this.peer_address = peer_address;

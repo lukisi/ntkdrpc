@@ -41,7 +41,7 @@ namespace zcd
 
         public class TcpCallerInfo : CallerInfo
         {
-            internal TcpCallerInfo(string my_address, string peer_address)
+            public TcpCallerInfo(string my_address, string peer_address)
             {
                 this.my_address = my_address;
                 this.peer_address = peer_address;
