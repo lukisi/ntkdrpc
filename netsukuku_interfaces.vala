@@ -57,8 +57,8 @@ namespace Netsukuku
 
     public class UnicastID : Object, Json.Serializable, ISerializable
     {
-        public string mac {get; private set;}
-        public INeighborhoodNodeID nodeid {get; private set;}
+        public string mac {get; set;}
+        public INeighborhoodNodeID nodeid {get; set;}
 
         public UnicastID(string mac, INeighborhoodNodeID nodeid)
         {
@@ -149,7 +149,7 @@ namespace Netsukuku
     public class BroadcastID : Object
     {
         // Has the message to be ignored by a certain node?
-        public INeighborhoodNodeID? ignore_nodeid {get; private set;}
+        public INeighborhoodNodeID? ignore_nodeid {get; set;}
 
         public BroadcastID(INeighborhoodNodeID? ignore_nodeid=null)
         {
