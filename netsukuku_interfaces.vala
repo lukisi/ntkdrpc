@@ -25,9 +25,14 @@ AddressManager addr
   void request_arc(INeighborhoodNodeID my_id, string mac, string nic_addr) throws NeighborhoodRequestArcError
   uint16 expect_ping(string guid, uint16 peer_port) throws NeighborhoodUnmanagedDeviceError
   void remove_arc(INeighborhoodNodeID my_id, string mac, string nic_addr)
+ QspnManager qspn_manager
+  IQspnEtpMessage get_full_etp(IQspnAddress requesting_address) throws QspnNotAcceptedError, QspnBootstrapInProgressError
+  void send_etp(IQspnEtpMessage etp, bool is_full) throws QspnNotAcceptedError
 Errors
  NeighborhoodRequestArcError(NOT_SAME_NETWORK,TOO_MANY_ARCS,TWO_ARCS_ON_COLLISION_DOMAIN,GENERIC)
  NeighborhoodUnmanagedDeviceError(GENERIC)
+ QspnNotAcceptedError(GENERIC)
+ QspnBootstrapInProgressError(GENERIC)
 
 ==========================================
  */
@@ -49,10 +54,26 @@ namespace Netsukuku
         GENERIC,
     }
 
+    public errordomain QspnNotAcceptedError {
+        GENERIC,
+    }
+
+    public errordomain QspnBootstrapInProgressError {
+        GENERIC,
+    }
+
     public interface INeighborhoodNodeID : Object
     {
         public abstract bool i_neighborhood_equals(INeighborhoodNodeID other);
         public abstract bool i_neighborhood_is_on_same_network(INeighborhoodNodeID other);
+    }
+
+    public interface IQspnEtpMessage : Object
+    {
+    }
+
+    public interface IQspnAddress : Object
+    {
     }
 
     public class UnicastID : Object, Json.Serializable, ISerializable

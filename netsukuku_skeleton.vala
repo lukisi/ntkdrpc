@@ -32,10 +32,18 @@ namespace Netsukuku
             public abstract void remove_arc(INeighborhoodNodeID my_id, string mac, string nic_addr, CallerInfo? caller=null);
         }
 
+        public interface IQspnManagerSkeleton : Object
+        {
+            public abstract IQspnEtpMessage get_full_etp(IQspnAddress requesting_address, CallerInfo? caller=null) throws QspnNotAcceptedError, QspnBootstrapInProgressError;
+            public abstract void send_etp(IQspnEtpMessage etp, bool is_full, CallerInfo? caller=null) throws QspnNotAcceptedError;
+        }
+
         public interface IAddressManagerSkeleton : Object
         {
             protected abstract unowned INeighborhoodManagerSkeleton neighborhood_manager_getter();
             public INeighborhoodManagerSkeleton neighborhood_manager {get {return neighborhood_manager_getter();}}
+            protected abstract unowned IQspnManagerSkeleton qspn_manager_getter();
+            public IQspnManagerSkeleton qspn_manager {get {return qspn_manager_getter();}}
         }
 
         public interface IRpcDelegate : Object
@@ -326,6 +334,112 @@ namespace Netsukuku
                     else
                     {
                         throw new InSkeletonDeserializeError.GENERIC(@"Unknown method in addr.neighborhood_manager: \"$(m_name)\"");
+                    }
+                }
+                else if (m_name.has_prefix("addr.qspn_manager."))
+                {
+                    if (m_name == "addr.qspn_manager.get_full_etp")
+                    {
+                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        IQspnAddress arg0;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (IQspnAddress requesting_address)
+                            string arg_name = "requesting_address";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IQspnAddress), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg0 = (IQspnAddress)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        try {
+                            IQspnEtpMessage result = addr.qspn_manager.get_full_etp(arg0, caller_info);
+                            ret = prepare_return_value_object(result);
+                        } catch (QspnNotAcceptedError e) {
+                            string code = "";
+                            if (e is QspnNotAcceptedError.GENERIC) code = "GENERIC";
+                            assert(code != "");
+                            ret = prepare_error("QspnNotAcceptedError", code, e.message);
+                        } catch (QspnBootstrapInProgressError e) {
+                            string code = "";
+                            if (e is QspnBootstrapInProgressError.GENERIC) code = "GENERIC";
+                            assert(code != "");
+                            ret = prepare_error("QspnBootstrapInProgressError", code, e.message);
+                        }
+                    }
+                    else if (m_name == "addr.qspn_manager.send_etp")
+                    {
+                        if (args.size != 2) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        IQspnEtpMessage arg0;
+                        bool arg1;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (IQspnEtpMessage etp)
+                            string arg_name = "etp";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IQspnEtpMessage), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg0 = (IQspnEtpMessage)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg1 (bool is_full)
+                            string arg_name = "is_full";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                arg1 = read_argument_bool_notnull(args[j]);
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        try {
+                            addr.qspn_manager.send_etp(arg0, arg1, caller_info);
+                            ret = prepare_return_value_null();
+                        } catch (QspnNotAcceptedError e) {
+                            string code = "";
+                            if (e is QspnNotAcceptedError.GENERIC) code = "GENERIC";
+                            assert(code != "");
+                            ret = prepare_error("QspnNotAcceptedError", code, e.message);
+                        }
+                    }
+                    else
+                    {
+                        throw new InSkeletonDeserializeError.GENERIC(@"Unknown method in addr.qspn_manager: \"$(m_name)\"");
                     }
                 }
                 else

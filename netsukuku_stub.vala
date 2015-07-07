@@ -32,10 +32,18 @@ namespace Netsukuku
             public abstract void remove_arc(INeighborhoodNodeID my_id, string mac, string nic_addr) throws StubError, DeserializeError;
         }
 
+        public interface IQspnManagerStub : Object
+        {
+            public abstract IQspnEtpMessage get_full_etp(IQspnAddress requesting_address) throws QspnNotAcceptedError, QspnBootstrapInProgressError, StubError, DeserializeError;
+            public abstract void send_etp(IQspnEtpMessage etp, bool is_full) throws QspnNotAcceptedError, StubError, DeserializeError;
+        }
+
         public interface IAddressManagerStub : Object
         {
             protected abstract unowned INeighborhoodManagerStub neighborhood_manager_getter();
             public INeighborhoodManagerStub neighborhood_manager {get {return neighborhood_manager_getter();}}
+            protected abstract unowned IQspnManagerStub qspn_manager_getter();
+            public IQspnManagerStub qspn_manager {get {return qspn_manager_getter();}}
         }
 
         public IAddressManagerStub get_addr_tcp_client(string peer_address, uint16 peer_port)
@@ -51,6 +59,7 @@ namespace Netsukuku
             private bool hurry;
             private bool wait_reply;
             private NeighborhoodManagerRemote _neighborhood_manager;
+            private QspnManagerRemote _qspn_manager;
             public AddressManagerTcpClientRootStub(string peer_address, uint16 peer_port)
             {
                 this.peer_address = peer_address;
@@ -59,6 +68,7 @@ namespace Netsukuku
                 hurry = false;
                 wait_reply = true;
                 _neighborhood_manager = new NeighborhoodManagerRemote(this.call);
+                _qspn_manager = new QspnManagerRemote(this.call);
             }
 
             public bool hurry_getter()
@@ -84,6 +94,11 @@ namespace Netsukuku
             protected unowned INeighborhoodManagerStub neighborhood_manager_getter()
             {
                 return _neighborhood_manager;
+            }
+
+            protected unowned IQspnManagerStub qspn_manager_getter()
+            {
+                return _qspn_manager;
             }
 
             private string call(string m_name, Gee.List<string> arguments) throws ZCDError, StubError
@@ -114,6 +129,7 @@ namespace Netsukuku
             private uint16 port;
             private bool wait_reply;
             private NeighborhoodManagerRemote _neighborhood_manager;
+            private QspnManagerRemote _qspn_manager;
             public AddressManagerUnicastRootStub(string dev, uint16 port, UnicastID unicast_id, bool wait_reply)
             {
                 s_unicast_id = prepare_direct_object(unicast_id);
@@ -121,11 +137,17 @@ namespace Netsukuku
                 this.port = port;
                 this.wait_reply = wait_reply;
                 _neighborhood_manager = new NeighborhoodManagerRemote(this.call);
+                _qspn_manager = new QspnManagerRemote(this.call);
             }
 
             protected unowned INeighborhoodManagerStub neighborhood_manager_getter()
             {
                 return _neighborhood_manager;
+            }
+
+            protected unowned IQspnManagerStub qspn_manager_getter()
+            {
+                return _qspn_manager;
             }
 
             private string call(string m_name, Gee.List<string> arguments) throws ZCDError, StubError
@@ -147,6 +169,7 @@ namespace Netsukuku
             private uint16 port;
             private IAckCommunicator? notify_ack;
             private NeighborhoodManagerRemote _neighborhood_manager;
+            private QspnManagerRemote _qspn_manager;
             public AddressManagerBroadcastRootStub
             (Gee.Collection<string> devs, uint16 port, BroadcastID broadcast_id, IAckCommunicator? notify_ack=null)
             {
@@ -156,11 +179,17 @@ namespace Netsukuku
                 this.port = port;
                 this.notify_ack = notify_ack;
                 _neighborhood_manager = new NeighborhoodManagerRemote(this.call);
+                _qspn_manager = new QspnManagerRemote(this.call);
             }
 
             protected unowned INeighborhoodManagerStub neighborhood_manager_getter()
             {
                 return _neighborhood_manager;
+            }
+
+            protected unowned IQspnManagerStub qspn_manager_getter()
+            {
+                return _qspn_manager;
             }
 
             private string call(string m_name, Gee.List<string> arguments) throws ZCDError, StubError
@@ -369,6 +398,106 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return;
+            }
+
+        }
+
+        internal class QspnManagerRemote : Object, IQspnManagerStub
+        {
+            private unowned FakeRmt rmt;
+            public QspnManagerRemote(FakeRmt rmt)
+            {
+                this.rmt = rmt;
+            }
+
+            public IQspnEtpMessage get_full_etp(IQspnAddress arg0) throws QspnNotAcceptedError, QspnBootstrapInProgressError, StubError, DeserializeError
+            {
+                string m_name = "addr.qspn_manager.get_full_etp";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (IQspnAddress requesting_address)
+                    args.add(prepare_argument_object(arg0));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                Object ret;
+                try {
+                    ret = read_return_value_object_notnull(typeof(IQspnEtpMessage), resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "QspnNotAcceptedError.GENERIC")
+                        throw new QspnNotAcceptedError.GENERIC(error_message);
+                    if (error_domain_code == "QspnBootstrapInProgressError.GENERIC")
+                        throw new QspnBootstrapInProgressError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                if (ret is ISerializable)
+                    if (!((ISerializable)ret).check_deserialization())
+                        throw new DeserializeError.GENERIC(@"$(doing): instance of $(ret.get_type().name()) has not been fully deserialized");
+                return (IQspnEtpMessage)ret;
+            }
+
+            public void send_etp(IQspnEtpMessage arg0, bool arg1) throws QspnNotAcceptedError, StubError, DeserializeError
+            {
+                string m_name = "addr.qspn_manager.send_etp";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (IQspnEtpMessage etp)
+                    args.add(prepare_argument_object(arg0));
+                }
+                {
+                    // serialize arg1 (bool is_full)
+                    args.add(prepare_argument_boolean(arg1));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                try {
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "QspnNotAcceptedError.GENERIC")
+                        throw new QspnNotAcceptedError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 return;
