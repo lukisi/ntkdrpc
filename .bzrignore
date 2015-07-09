@@ -8,6 +8,7 @@ common_stub.c
 netsukuku_interfaces.c
 netsukuku_skeleton.c
 netsukuku_stub.c
+addendum.c
 ntkdrpc.h
 ntkdrpc.vapi
 Makefile.in
