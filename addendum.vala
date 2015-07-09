@@ -17,6 +17,8 @@
  */
 
 using Gee;
+using zcd;
+using zcd.ModRpc;
 
 namespace Netsukuku
 {
