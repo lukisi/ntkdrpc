@@ -38,12 +38,26 @@ namespace Netsukuku
             public abstract void send_etp(IQspnEtpMessage etp, bool is_full, CallerInfo? caller=null) throws QspnNotAcceptedError;
         }
 
+        public interface IPeersManagerSkeleton : Object
+        {
+            public abstract IPeerParticipantSet get_participant_set(int lvl, CallerInfo? caller=null);
+            public abstract void forward_peer_message(IPeerMessage peer_message, CallerInfo? caller=null);
+            public abstract IPeersRequest get_request(int msg_id, IPeerTupleNode respondant, CallerInfo? caller=null) throws PeersUnknownMessageError;
+            public abstract void set_response(int msg_id, IPeersResponse response, CallerInfo? caller=null);
+            public abstract void set_next_destination(int msg_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
+            public abstract void set_failure(int msg_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
+            public abstract void set_non_participant(int msg_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
+            public abstract void set_participant(int p_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
+        }
+
         public interface IAddressManagerSkeleton : Object
         {
             protected abstract unowned INeighborhoodManagerSkeleton neighborhood_manager_getter();
             public INeighborhoodManagerSkeleton neighborhood_manager {get {return neighborhood_manager_getter();}}
             protected abstract unowned IQspnManagerSkeleton qspn_manager_getter();
             public IQspnManagerSkeleton qspn_manager {get {return qspn_manager_getter();}}
+            protected abstract unowned IPeersManagerSkeleton peers_manager_getter();
+            public IPeersManagerSkeleton peers_manager {get {return peers_manager_getter();}}
         }
 
         public interface IRpcDelegate : Object
@@ -440,6 +454,395 @@ namespace Netsukuku
                     else
                     {
                         throw new InSkeletonDeserializeError.GENERIC(@"Unknown method in addr.qspn_manager: \"$(m_name)\"");
+                    }
+                }
+                else if (m_name.has_prefix("addr.peers_manager."))
+                {
+                    if (m_name == "addr.peers_manager.get_participant_set")
+                    {
+                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        int arg0;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (int lvl)
+                            string arg_name = "lvl";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                if (val > int.MAX || val < int.MIN)
+                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
+                                arg0 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        IPeerParticipantSet result = addr.peers_manager.get_participant_set(arg0, caller_info);
+                        ret = prepare_return_value_object(result);
+                    }
+                    else if (m_name == "addr.peers_manager.forward_peer_message")
+                    {
+                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        IPeerMessage arg0;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (IPeerMessage peer_message)
+                            string arg_name = "peer_message";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IPeerMessage), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg0 = (IPeerMessage)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.peers_manager.forward_peer_message(arg0, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.peers_manager.get_request")
+                    {
+                        if (args.size != 2) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        int arg0;
+                        IPeerTupleNode arg1;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (int msg_id)
+                            string arg_name = "msg_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                if (val > int.MAX || val < int.MIN)
+                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
+                                arg0 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg1 (IPeerTupleNode respondant)
+                            string arg_name = "respondant";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IPeerTupleNode), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg1 = (IPeerTupleNode)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        try {
+                            IPeersRequest result = addr.peers_manager.get_request(arg0, arg1, caller_info);
+                            ret = prepare_return_value_object(result);
+                        } catch (PeersUnknownMessageError e) {
+                            string code = "";
+                            if (e is PeersUnknownMessageError.GENERIC) code = "GENERIC";
+                            assert(code != "");
+                            ret = prepare_error("PeersUnknownMessageError", code, e.message);
+                        }
+                    }
+                    else if (m_name == "addr.peers_manager.set_response")
+                    {
+                        if (args.size != 2) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        int arg0;
+                        IPeersResponse arg1;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (int msg_id)
+                            string arg_name = "msg_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                if (val > int.MAX || val < int.MIN)
+                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
+                                arg0 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg1 (IPeersResponse response)
+                            string arg_name = "response";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IPeersResponse), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg1 = (IPeersResponse)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.peers_manager.set_response(arg0, arg1, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.peers_manager.set_next_destination")
+                    {
+                        if (args.size != 2) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        int arg0;
+                        IPeerTupleGNode arg1;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (int msg_id)
+                            string arg_name = "msg_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                if (val > int.MAX || val < int.MIN)
+                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
+                                arg0 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg1 (IPeerTupleGNode tuple)
+                            string arg_name = "tuple";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IPeerTupleGNode), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg1 = (IPeerTupleGNode)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.peers_manager.set_next_destination(arg0, arg1, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.peers_manager.set_failure")
+                    {
+                        if (args.size != 2) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        int arg0;
+                        IPeerTupleGNode arg1;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (int msg_id)
+                            string arg_name = "msg_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                if (val > int.MAX || val < int.MIN)
+                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
+                                arg0 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg1 (IPeerTupleGNode tuple)
+                            string arg_name = "tuple";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IPeerTupleGNode), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg1 = (IPeerTupleGNode)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.peers_manager.set_failure(arg0, arg1, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.peers_manager.set_non_participant")
+                    {
+                        if (args.size != 2) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        int arg0;
+                        IPeerTupleGNode arg1;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (int msg_id)
+                            string arg_name = "msg_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                if (val > int.MAX || val < int.MIN)
+                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
+                                arg0 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg1 (IPeerTupleGNode tuple)
+                            string arg_name = "tuple";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IPeerTupleGNode), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg1 = (IPeerTupleGNode)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.peers_manager.set_non_participant(arg0, arg1, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.peers_manager.set_participant")
+                    {
+                        if (args.size != 2) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        int arg0;
+                        IPeerTupleGNode arg1;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (int p_id)
+                            string arg_name = "p_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                if (val > int.MAX || val < int.MIN)
+                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
+                                arg0 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg1 (IPeerTupleGNode tuple)
+                            string arg_name = "tuple";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IPeerTupleGNode), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg1 = (IPeerTupleGNode)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.peers_manager.set_participant(arg0, arg1, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else
+                    {
+                        throw new InSkeletonDeserializeError.GENERIC(@"Unknown method in addr.peers_manager: \"$(m_name)\"");
                     }
                 }
                 else

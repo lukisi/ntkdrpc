@@ -28,11 +28,21 @@ AddressManager addr
  QspnManager qspn_manager
   IQspnEtpMessage get_full_etp(IQspnAddress requesting_address) throws QspnNotAcceptedError, QspnBootstrapInProgressError
   void send_etp(IQspnEtpMessage etp, bool is_full) throws QspnNotAcceptedError
+ PeersManager peers_manager
+  IPeerParticipantSet get_participant_set(int lvl)
+  void forward_peer_message(IPeerMessage peer_message)
+  IPeersRequest get_request(int msg_id, IPeerTupleNode respondant) throws PeersUnknownMessageError
+  void set_response(int msg_id, IPeersResponse response)
+  void set_next_destination(int msg_id, IPeerTupleGNode tuple)
+  void set_failure(int msg_id, IPeerTupleGNode tuple)
+  void set_non_participant(int msg_id, IPeerTupleGNode tuple)
+  void set_participant(int p_id, IPeerTupleGNode tuple)
 Errors
  NeighborhoodRequestArcError(NOT_SAME_NETWORK,TOO_MANY_ARCS,TWO_ARCS_ON_COLLISION_DOMAIN,GENERIC)
  NeighborhoodUnmanagedDeviceError(GENERIC)
  QspnNotAcceptedError(GENERIC)
  QspnBootstrapInProgressError(GENERIC)
+ PeersUnknownMessageError(GENERIC)
 
 ==========================================
  */
@@ -62,6 +72,10 @@ namespace Netsukuku
         GENERIC,
     }
 
+    public errordomain PeersUnknownMessageError {
+        GENERIC,
+    }
+
     public interface INeighborhoodNodeID : Object
     {
         public abstract bool i_neighborhood_equals(INeighborhoodNodeID other);
@@ -73,6 +87,30 @@ namespace Netsukuku
     }
 
     public interface IQspnAddress : Object
+    {
+    }
+
+    public interface IPeerParticipantSet : Object
+    {
+    }
+
+    public interface IPeerMessage : Object
+    {
+    }
+
+    public interface IPeersRequest : Object
+    {
+    }
+
+    public interface IPeerTupleNode : Object
+    {
+    }
+
+    public interface IPeersResponse : Object
+    {
+    }
+
+    public interface IPeerTupleGNode : Object
     {
     }
 
