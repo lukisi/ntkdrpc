@@ -40,9 +40,9 @@ namespace Netsukuku
 
         public interface IPeersManagerStub : Object
         {
-            public abstract IPeerParticipantSet get_participant_set(int lvl) throws StubError, DeserializeError;
+            public abstract IPeerParticipantSet get_participant_set(int lvl) throws PeersInvalidRequest, StubError, DeserializeError;
             public abstract void forward_peer_message(IPeerMessage peer_message) throws StubError, DeserializeError;
-            public abstract IPeersRequest get_request(int msg_id, IPeerTupleNode respondant) throws PeersUnknownMessageError, StubError, DeserializeError;
+            public abstract IPeersRequest get_request(int msg_id, IPeerTupleNode respondant) throws PeersUnknownMessageError, PeersInvalidRequest, StubError, DeserializeError;
             public abstract void set_response(int msg_id, IPeersResponse response) throws StubError, DeserializeError;
             public abstract void set_next_destination(int msg_id, IPeerTupleGNode tuple) throws StubError, DeserializeError;
             public abstract void set_failure(int msg_id, IPeerTupleGNode tuple) throws StubError, DeserializeError;
@@ -548,7 +548,7 @@ namespace Netsukuku
                 this.rmt = rmt;
             }
 
-            public IPeerParticipantSet get_participant_set(int arg0) throws StubError, DeserializeError
+            public IPeerParticipantSet get_participant_set(int arg0) throws PeersInvalidRequest, StubError, DeserializeError
             {
                 string m_name = "addr.peers_manager.get_participant_set";
                 ArrayList<string> args = new ArrayList<string>();
@@ -581,6 +581,8 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "PeersInvalidRequest.GENERIC")
+                        throw new PeersInvalidRequest.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 if (ret is ISerializable)
@@ -628,7 +630,7 @@ namespace Netsukuku
                 return;
             }
 
-            public IPeersRequest get_request(int arg0, IPeerTupleNode arg1) throws PeersUnknownMessageError, StubError, DeserializeError
+            public IPeersRequest get_request(int arg0, IPeerTupleNode arg1) throws PeersUnknownMessageError, PeersInvalidRequest, StubError, DeserializeError
             {
                 string m_name = "addr.peers_manager.get_request";
                 ArrayList<string> args = new ArrayList<string>();
@@ -667,6 +669,8 @@ namespace Netsukuku
                     string error_domain_code = @"$(error_domain).$(error_code)";
                     if (error_domain_code == "PeersUnknownMessageError.GENERIC")
                         throw new PeersUnknownMessageError.GENERIC(error_message);
+                    if (error_domain_code == "PeersInvalidRequest.GENERIC")
+                        throw new PeersInvalidRequest.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 if (ret is ISerializable)

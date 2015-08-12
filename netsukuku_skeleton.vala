@@ -40,9 +40,9 @@ namespace Netsukuku
 
         public interface IPeersManagerSkeleton : Object
         {
-            public abstract IPeerParticipantSet get_participant_set(int lvl, CallerInfo? caller=null);
+            public abstract IPeerParticipantSet get_participant_set(int lvl, CallerInfo? caller=null) throws PeersInvalidRequest;
             public abstract void forward_peer_message(IPeerMessage peer_message, CallerInfo? caller=null);
-            public abstract IPeersRequest get_request(int msg_id, IPeerTupleNode respondant, CallerInfo? caller=null) throws PeersUnknownMessageError;
+            public abstract IPeersRequest get_request(int msg_id, IPeerTupleNode respondant, CallerInfo? caller=null) throws PeersUnknownMessageError, PeersInvalidRequest;
             public abstract void set_response(int msg_id, IPeersResponse response, CallerInfo? caller=null);
             public abstract void set_next_destination(int msg_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
             public abstract void set_failure(int msg_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
@@ -486,8 +486,15 @@ namespace Netsukuku
                             j++;
                         }
 
-                        IPeerParticipantSet result = addr.peers_manager.get_participant_set(arg0, caller_info);
-                        ret = prepare_return_value_object(result);
+                        try {
+                            IPeerParticipantSet result = addr.peers_manager.get_participant_set(arg0, caller_info);
+                            ret = prepare_return_value_object(result);
+                        } catch (PeersInvalidRequest e) {
+                            string code = "";
+                            if (e is PeersInvalidRequest.GENERIC) code = "GENERIC";
+                            assert(code != "");
+                            ret = prepare_error("PeersInvalidRequest", code, e.message);
+                        }
                     }
                     else if (m_name == "addr.peers_manager.forward_peer_message")
                     {
@@ -578,6 +585,11 @@ namespace Netsukuku
                             if (e is PeersUnknownMessageError.GENERIC) code = "GENERIC";
                             assert(code != "");
                             ret = prepare_error("PeersUnknownMessageError", code, e.message);
+                        } catch (PeersInvalidRequest e) {
+                            string code = "";
+                            if (e is PeersInvalidRequest.GENERIC) code = "GENERIC";
+                            assert(code != "");
+                            ret = prepare_error("PeersInvalidRequest", code, e.message);
                         }
                     }
                     else if (m_name == "addr.peers_manager.set_response")

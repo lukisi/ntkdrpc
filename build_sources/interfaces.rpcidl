@@ -8,9 +8,9 @@ AddressManager addr
   IQspnEtpMessage get_full_etp(IQspnAddress requesting_address) throws QspnNotAcceptedError, QspnBootstrapInProgressError
   void send_etp(IQspnEtpMessage etp, bool is_full) throws QspnNotAcceptedError
  PeersManager peers_manager
-  IPeerParticipantSet get_participant_set(int lvl)
+  IPeerParticipantSet get_participant_set(int lvl) throws PeersInvalidRequest
   void forward_peer_message(IPeerMessage peer_message)
-  IPeersRequest get_request(int msg_id, IPeerTupleNode respondant) throws PeersUnknownMessageError
+  IPeersRequest get_request(int msg_id, IPeerTupleNode respondant) throws PeersUnknownMessageError, PeersInvalidRequest
   void set_response(int msg_id, IPeersResponse response)
   void set_next_destination(int msg_id, IPeerTupleGNode tuple)
   void set_failure(int msg_id, IPeerTupleGNode tuple)
@@ -22,4 +22,5 @@ Errors
  QspnNotAcceptedError(GENERIC)
  QspnBootstrapInProgressError(GENERIC)
  PeersUnknownMessageError(GENERIC)
+ PeersInvalidRequest(GENERIC)
 
