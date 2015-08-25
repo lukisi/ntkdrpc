@@ -50,6 +50,12 @@ namespace Netsukuku
             public abstract void set_participant(int p_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
         }
 
+        public interface ICoordinatorManagerSkeleton : Object
+        {
+            public abstract ICoordinatorNeighborMap retrieve_neighbor_map(CallerInfo? caller=null);
+            public abstract ICoordinatorReservation ask_reservation(int lvl, CallerInfo? caller=null) throws SaturatedGnodeError;
+        }
+
         public interface IAddressManagerSkeleton : Object
         {
             protected abstract unowned INeighborhoodManagerSkeleton neighborhood_manager_getter();
@@ -58,6 +64,8 @@ namespace Netsukuku
             public IQspnManagerSkeleton qspn_manager {get {return qspn_manager_getter();}}
             protected abstract unowned IPeersManagerSkeleton peers_manager_getter();
             public IPeersManagerSkeleton peers_manager {get {return peers_manager_getter();}}
+            protected abstract unowned ICoordinatorManagerSkeleton coordinator_manager_getter();
+            public ICoordinatorManagerSkeleton coordinator_manager {get {return coordinator_manager_getter();}}
         }
 
         public interface IRpcDelegate : Object
@@ -855,6 +863,59 @@ namespace Netsukuku
                     else
                     {
                         throw new InSkeletonDeserializeError.GENERIC(@"Unknown method in addr.peers_manager: \"$(m_name)\"");
+                    }
+                }
+                else if (m_name.has_prefix("addr.coordinator_manager."))
+                {
+                    if (m_name == "addr.coordinator_manager.retrieve_neighbor_map")
+                    {
+                        if (args.size != 0) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+
+                        ICoordinatorNeighborMap result = addr.coordinator_manager.retrieve_neighbor_map(caller_info);
+                        ret = prepare_return_value_object(result);
+                    }
+                    else if (m_name == "addr.coordinator_manager.ask_reservation")
+                    {
+                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        int arg0;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (int lvl)
+                            string arg_name = "lvl";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                if (val > int.MAX || val < int.MIN)
+                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
+                                arg0 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        try {
+                            ICoordinatorReservation result = addr.coordinator_manager.ask_reservation(arg0, caller_info);
+                            ret = prepare_return_value_object(result);
+                        } catch (SaturatedGnodeError e) {
+                            string code = "";
+                            if (e is SaturatedGnodeError.GENERIC) code = "GENERIC";
+                            assert(code != "");
+                            ret = prepare_error("SaturatedGnodeError", code, e.message);
+                        }
+                    }
+                    else
+                    {
+                        throw new InSkeletonDeserializeError.GENERIC(@"Unknown method in addr.coordinator_manager: \"$(m_name)\"");
                     }
                 }
                 else

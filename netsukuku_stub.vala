@@ -50,6 +50,12 @@ namespace Netsukuku
             public abstract void set_participant(int p_id, IPeerTupleGNode tuple) throws StubError, DeserializeError;
         }
 
+        public interface ICoordinatorManagerStub : Object
+        {
+            public abstract ICoordinatorNeighborMap retrieve_neighbor_map() throws StubError, DeserializeError;
+            public abstract ICoordinatorReservation ask_reservation(int lvl) throws SaturatedGnodeError, StubError, DeserializeError;
+        }
+
         public interface IAddressManagerStub : Object
         {
             protected abstract unowned INeighborhoodManagerStub neighborhood_manager_getter();
@@ -58,6 +64,8 @@ namespace Netsukuku
             public IQspnManagerStub qspn_manager {get {return qspn_manager_getter();}}
             protected abstract unowned IPeersManagerStub peers_manager_getter();
             public IPeersManagerStub peers_manager {get {return peers_manager_getter();}}
+            protected abstract unowned ICoordinatorManagerStub coordinator_manager_getter();
+            public ICoordinatorManagerStub coordinator_manager {get {return coordinator_manager_getter();}}
         }
 
         public IAddressManagerStub get_addr_tcp_client(string peer_address, uint16 peer_port)
@@ -75,6 +83,7 @@ namespace Netsukuku
             private NeighborhoodManagerRemote _neighborhood_manager;
             private QspnManagerRemote _qspn_manager;
             private PeersManagerRemote _peers_manager;
+            private CoordinatorManagerRemote _coordinator_manager;
             public AddressManagerTcpClientRootStub(string peer_address, uint16 peer_port)
             {
                 this.peer_address = peer_address;
@@ -85,6 +94,7 @@ namespace Netsukuku
                 _neighborhood_manager = new NeighborhoodManagerRemote(this.call);
                 _qspn_manager = new QspnManagerRemote(this.call);
                 _peers_manager = new PeersManagerRemote(this.call);
+                _coordinator_manager = new CoordinatorManagerRemote(this.call);
             }
 
             public bool hurry_getter()
@@ -122,6 +132,11 @@ namespace Netsukuku
                 return _peers_manager;
             }
 
+            protected unowned ICoordinatorManagerStub coordinator_manager_getter()
+            {
+                return _coordinator_manager;
+            }
+
             private string call(string m_name, Gee.List<string> arguments) throws ZCDError, StubError
             {
                 if (hurry && !client.is_queue_empty())
@@ -152,6 +167,7 @@ namespace Netsukuku
             private NeighborhoodManagerRemote _neighborhood_manager;
             private QspnManagerRemote _qspn_manager;
             private PeersManagerRemote _peers_manager;
+            private CoordinatorManagerRemote _coordinator_manager;
             public AddressManagerUnicastRootStub(string dev, uint16 port, UnicastID unicast_id, bool wait_reply)
             {
                 s_unicast_id = prepare_direct_object(unicast_id);
@@ -161,6 +177,7 @@ namespace Netsukuku
                 _neighborhood_manager = new NeighborhoodManagerRemote(this.call);
                 _qspn_manager = new QspnManagerRemote(this.call);
                 _peers_manager = new PeersManagerRemote(this.call);
+                _coordinator_manager = new CoordinatorManagerRemote(this.call);
             }
 
             protected unowned INeighborhoodManagerStub neighborhood_manager_getter()
@@ -176,6 +193,11 @@ namespace Netsukuku
             protected unowned IPeersManagerStub peers_manager_getter()
             {
                 return _peers_manager;
+            }
+
+            protected unowned ICoordinatorManagerStub coordinator_manager_getter()
+            {
+                return _coordinator_manager;
             }
 
             private string call(string m_name, Gee.List<string> arguments) throws ZCDError, StubError
@@ -199,6 +221,7 @@ namespace Netsukuku
             private NeighborhoodManagerRemote _neighborhood_manager;
             private QspnManagerRemote _qspn_manager;
             private PeersManagerRemote _peers_manager;
+            private CoordinatorManagerRemote _coordinator_manager;
             public AddressManagerBroadcastRootStub
             (Gee.Collection<string> devs, uint16 port, BroadcastID broadcast_id, IAckCommunicator? notify_ack=null)
             {
@@ -210,6 +233,7 @@ namespace Netsukuku
                 _neighborhood_manager = new NeighborhoodManagerRemote(this.call);
                 _qspn_manager = new QspnManagerRemote(this.call);
                 _peers_manager = new PeersManagerRemote(this.call);
+                _coordinator_manager = new CoordinatorManagerRemote(this.call);
             }
 
             protected unowned INeighborhoodManagerStub neighborhood_manager_getter()
@@ -225,6 +249,11 @@ namespace Netsukuku
             protected unowned IPeersManagerStub peers_manager_getter()
             {
                 return _peers_manager;
+            }
+
+            protected unowned ICoordinatorManagerStub coordinator_manager_getter()
+            {
+                return _coordinator_manager;
             }
 
             private string call(string m_name, Gee.List<string> arguments) throws ZCDError, StubError
@@ -892,6 +921,96 @@ namespace Netsukuku
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 return;
+            }
+
+        }
+
+        internal class CoordinatorManagerRemote : Object, ICoordinatorManagerStub
+        {
+            private unowned FakeRmt rmt;
+            public CoordinatorManagerRemote(FakeRmt rmt)
+            {
+                this.rmt = rmt;
+            }
+
+            public ICoordinatorNeighborMap retrieve_neighbor_map() throws StubError, DeserializeError
+            {
+                string m_name = "addr.coordinator_manager.retrieve_neighbor_map";
+                ArrayList<string> args = new ArrayList<string>();
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                Object ret;
+                try {
+                    ret = read_return_value_object_notnull(typeof(ICoordinatorNeighborMap), resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                if (ret is ISerializable)
+                    if (!((ISerializable)ret).check_deserialization())
+                        throw new DeserializeError.GENERIC(@"$(doing): instance of $(ret.get_type().name()) has not been fully deserialized");
+                return (ICoordinatorNeighborMap)ret;
+            }
+
+            public ICoordinatorReservation ask_reservation(int arg0) throws SaturatedGnodeError, StubError, DeserializeError
+            {
+                string m_name = "addr.coordinator_manager.ask_reservation";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (int lvl)
+                    args.add(prepare_argument_int64(arg0));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                Object ret;
+                try {
+                    ret = read_return_value_object_notnull(typeof(ICoordinatorReservation), resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "SaturatedGnodeError.GENERIC")
+                        throw new SaturatedGnodeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                if (ret is ISerializable)
+                    if (!((ISerializable)ret).check_deserialization())
+                        throw new DeserializeError.GENERIC(@"$(doing): instance of $(ret.get_type().name()) has not been fully deserialized");
+                return (ICoordinatorReservation)ret;
             }
 
         }

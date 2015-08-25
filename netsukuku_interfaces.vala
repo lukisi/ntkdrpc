@@ -37,6 +37,9 @@ AddressManager addr
   void set_failure(int msg_id, IPeerTupleGNode tuple)
   void set_non_participant(int msg_id, IPeerTupleGNode tuple)
   void set_participant(int p_id, IPeerTupleGNode tuple)
+ CoordinatorManager coordinator_manager
+  ICoordinatorNeighborMap retrieve_neighbor_map()
+  ICoordinatorReservation ask_reservation(int lvl) throws SaturatedGnodeError
 Errors
  NeighborhoodRequestArcError(NOT_SAME_NETWORK,TOO_MANY_ARCS,TWO_ARCS_ON_COLLISION_DOMAIN,GENERIC)
  NeighborhoodUnmanagedDeviceError(GENERIC)
@@ -44,6 +47,7 @@ Errors
  QspnBootstrapInProgressError(GENERIC)
  PeersUnknownMessageError(GENERIC)
  PeersInvalidRequest(GENERIC)
+ SaturatedGnodeError(GENERIC)
 
 ==========================================
  */
@@ -78,6 +82,10 @@ namespace Netsukuku
     }
 
     public errordomain PeersInvalidRequest {
+        GENERIC,
+    }
+
+    public errordomain SaturatedGnodeError {
         GENERIC,
     }
 
@@ -116,6 +124,14 @@ namespace Netsukuku
     }
 
     public interface IPeerTupleGNode : Object
+    {
+    }
+
+    public interface ICoordinatorNeighborMap : Object
+    {
+    }
+
+    public interface ICoordinatorReservation : Object
     {
     }
 
