@@ -52,8 +52,8 @@ namespace Netsukuku
 
         public interface ICoordinatorManagerSkeleton : Object
         {
-            public abstract ICoordinatorNeighborMap retrieve_neighbor_map(CallerInfo? caller=null);
-            public abstract ICoordinatorReservation ask_reservation(int lvl, CallerInfo? caller=null) throws SaturatedGnodeError;
+            public abstract ICoordinatorNeighborMapMessage retrieve_neighbor_map(CallerInfo? caller=null);
+            public abstract ICoordinatorReservationMessage ask_reservation(int lvl, CallerInfo? caller=null) throws SaturatedGnodeError;
         }
 
         public interface IAddressManagerSkeleton : Object
@@ -872,7 +872,7 @@ namespace Netsukuku
                         if (args.size != 0) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
 
 
-                        ICoordinatorNeighborMap result = addr.coordinator_manager.retrieve_neighbor_map(caller_info);
+                        ICoordinatorNeighborMapMessage result = addr.coordinator_manager.retrieve_neighbor_map(caller_info);
                         ret = prepare_return_value_object(result);
                     }
                     else if (m_name == "addr.coordinator_manager.ask_reservation")
@@ -904,7 +904,7 @@ namespace Netsukuku
                         }
 
                         try {
-                            ICoordinatorReservation result = addr.coordinator_manager.ask_reservation(arg0, caller_info);
+                            ICoordinatorReservationMessage result = addr.coordinator_manager.ask_reservation(arg0, caller_info);
                             ret = prepare_return_value_object(result);
                         } catch (SaturatedGnodeError e) {
                             string code = "";

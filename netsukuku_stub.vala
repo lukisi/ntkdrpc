@@ -52,8 +52,8 @@ namespace Netsukuku
 
         public interface ICoordinatorManagerStub : Object
         {
-            public abstract ICoordinatorNeighborMap retrieve_neighbor_map() throws StubError, DeserializeError;
-            public abstract ICoordinatorReservation ask_reservation(int lvl) throws SaturatedGnodeError, StubError, DeserializeError;
+            public abstract ICoordinatorNeighborMapMessage retrieve_neighbor_map() throws StubError, DeserializeError;
+            public abstract ICoordinatorReservationMessage ask_reservation(int lvl) throws SaturatedGnodeError, StubError, DeserializeError;
         }
 
         public interface IAddressManagerStub : Object
@@ -933,7 +933,7 @@ namespace Netsukuku
                 this.rmt = rmt;
             }
 
-            public ICoordinatorNeighborMap retrieve_neighbor_map() throws StubError, DeserializeError
+            public ICoordinatorNeighborMapMessage retrieve_neighbor_map() throws StubError, DeserializeError
             {
                 string m_name = "addr.coordinator_manager.retrieve_neighbor_map";
                 ArrayList<string> args = new ArrayList<string>();
@@ -953,7 +953,7 @@ namespace Netsukuku
                 string doing = @"Reading return-value of $(m_name)";
                 Object ret;
                 try {
-                    ret = read_return_value_object_notnull(typeof(ICoordinatorNeighborMap), resp, out error_domain, out error_code, out error_message);
+                    ret = read_return_value_object_notnull(typeof(ICoordinatorNeighborMapMessage), resp, out error_domain, out error_code, out error_message);
                 } catch (HelperNotJsonError e) {
                     error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
                 } catch (HelperDeserializeError e) {
@@ -967,10 +967,10 @@ namespace Netsukuku
                 if (ret is ISerializable)
                     if (!((ISerializable)ret).check_deserialization())
                         throw new DeserializeError.GENERIC(@"$(doing): instance of $(ret.get_type().name()) has not been fully deserialized");
-                return (ICoordinatorNeighborMap)ret;
+                return (ICoordinatorNeighborMapMessage)ret;
             }
 
-            public ICoordinatorReservation ask_reservation(int arg0) throws SaturatedGnodeError, StubError, DeserializeError
+            public ICoordinatorReservationMessage ask_reservation(int arg0) throws SaturatedGnodeError, StubError, DeserializeError
             {
                 string m_name = "addr.coordinator_manager.ask_reservation";
                 ArrayList<string> args = new ArrayList<string>();
@@ -994,7 +994,7 @@ namespace Netsukuku
                 string doing = @"Reading return-value of $(m_name)";
                 Object ret;
                 try {
-                    ret = read_return_value_object_notnull(typeof(ICoordinatorReservation), resp, out error_domain, out error_code, out error_message);
+                    ret = read_return_value_object_notnull(typeof(ICoordinatorReservationMessage), resp, out error_domain, out error_code, out error_message);
                 } catch (HelperNotJsonError e) {
                     error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
                 } catch (HelperDeserializeError e) {
@@ -1010,7 +1010,7 @@ namespace Netsukuku
                 if (ret is ISerializable)
                     if (!((ISerializable)ret).check_deserialization())
                         throw new DeserializeError.GENERIC(@"$(doing): instance of $(ret.get_type().name()) has not been fully deserialized");
-                return (ICoordinatorReservation)ret;
+                return (ICoordinatorReservationMessage)ret;
             }
 
         }
