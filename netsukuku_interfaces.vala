@@ -25,6 +25,7 @@ AddressManager addr
   void request_arc(INeighborhoodNodeID my_id, string mac, string nic_addr) throws NeighborhoodRequestArcError
   uint16 expect_ping(string guid, uint16 peer_port) throws NeighborhoodUnmanagedDeviceError
   void remove_arc(INeighborhoodNodeID my_id, string mac, string nic_addr)
+  void nop()
  QspnManager qspn_manager
   IQspnEtpMessage get_full_etp(IQspnAddress requesting_address) throws QspnNotAcceptedError, QspnBootstrapInProgressError
   void send_etp(IQspnEtpMessage etp, bool is_full) throws QspnNotAcceptedError
@@ -92,7 +93,6 @@ namespace Netsukuku
     public interface INeighborhoodNodeID : Object
     {
         public abstract bool i_neighborhood_equals(INeighborhoodNodeID other);
-        public abstract bool i_neighborhood_is_on_same_network(INeighborhoodNodeID other);
     }
 
     public interface IQspnEtpMessage : Object

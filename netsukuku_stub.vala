@@ -30,6 +30,7 @@ namespace Netsukuku
             public abstract void request_arc(INeighborhoodNodeID my_id, string mac, string nic_addr) throws NeighborhoodRequestArcError, StubError, DeserializeError;
             public abstract uint16 expect_ping(string guid, uint16 peer_port) throws NeighborhoodUnmanagedDeviceError, StubError, DeserializeError;
             public abstract void remove_arc(INeighborhoodNodeID my_id, string mac, string nic_addr) throws StubError, DeserializeError;
+            public abstract void nop() throws StubError, DeserializeError;
         }
 
         public interface IQspnManagerStub : Object
@@ -436,6 +437,41 @@ namespace Netsukuku
                     // serialize arg2 (string nic_addr)
                     args.add(prepare_argument_string(arg2));
                 }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                try {
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return;
+            }
+
+            public void nop() throws StubError, DeserializeError
+            {
+                string m_name = "addr.neighborhood_manager.nop";
+                ArrayList<string> args = new ArrayList<string>();
 
                 string resp;
                 try {

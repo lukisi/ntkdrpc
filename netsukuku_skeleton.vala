@@ -30,6 +30,7 @@ namespace Netsukuku
             public abstract void request_arc(INeighborhoodNodeID my_id, string mac, string nic_addr, CallerInfo? caller=null) throws NeighborhoodRequestArcError;
             public abstract uint16 expect_ping(string guid, uint16 peer_port, CallerInfo? caller=null) throws NeighborhoodUnmanagedDeviceError;
             public abstract void remove_arc(INeighborhoodNodeID my_id, string mac, string nic_addr, CallerInfo? caller=null);
+            public abstract void nop(CallerInfo? caller=null);
         }
 
         public interface IQspnManagerSkeleton : Object
@@ -351,6 +352,14 @@ namespace Netsukuku
                         }
 
                         addr.neighborhood_manager.remove_arc(arg0, arg1, arg2, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.neighborhood_manager.nop")
+                    {
+                        if (args.size != 0) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+
+                        addr.neighborhood_manager.nop(caller_info);
                         ret = prepare_return_value_null();
                     }
                     else
