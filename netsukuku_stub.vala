@@ -313,6 +313,8 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 return;
@@ -368,6 +370,8 @@ namespace Netsukuku
                         throw new NeighborhoodRequestArcError.TWO_ARCS_ON_COLLISION_DOMAIN(error_message);
                     if (error_domain_code == "NeighborhoodRequestArcError.GENERIC")
                         throw new NeighborhoodRequestArcError.GENERIC(error_message);
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 return;
@@ -413,6 +417,8 @@ namespace Netsukuku
                     string error_domain_code = @"$(error_domain).$(error_code)";
                     if (error_domain_code == "NeighborhoodUnmanagedDeviceError.GENERIC")
                         throw new NeighborhoodUnmanagedDeviceError.GENERIC(error_message);
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 if (val > uint16.MAX || val < uint16.MIN)
@@ -463,6 +469,8 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 return;
@@ -498,6 +506,8 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 return;
@@ -550,6 +560,8 @@ namespace Netsukuku
                         throw new QspnNotAcceptedError.GENERIC(error_message);
                     if (error_domain_code == "QspnBootstrapInProgressError.GENERIC")
                         throw new QspnBootstrapInProgressError.GENERIC(error_message);
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 if (ret is ISerializable)
@@ -598,6 +610,8 @@ namespace Netsukuku
                     string error_domain_code = @"$(error_domain).$(error_code)";
                     if (error_domain_code == "QspnNotAcceptedError.GENERIC")
                         throw new QspnNotAcceptedError.GENERIC(error_message);
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 return;
@@ -648,6 +662,8 @@ namespace Netsukuku
                     string error_domain_code = @"$(error_domain).$(error_code)";
                     if (error_domain_code == "PeersInvalidRequest.GENERIC")
                         throw new PeersInvalidRequest.GENERIC(error_message);
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 if (ret is ISerializable)
@@ -690,6 +706,8 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 return;
@@ -736,6 +754,8 @@ namespace Netsukuku
                         throw new PeersUnknownMessageError.GENERIC(error_message);
                     if (error_domain_code == "PeersInvalidRequest.GENERIC")
                         throw new PeersInvalidRequest.GENERIC(error_message);
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 if (ret is ISerializable)
@@ -782,6 +802,8 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 return;
@@ -825,6 +847,8 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 return;
@@ -868,6 +892,8 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 return;
@@ -911,6 +937,8 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 return;
@@ -954,6 +982,8 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 return;
@@ -998,6 +1028,8 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 if (ret is ISerializable)
@@ -1041,6 +1073,8 @@ namespace Netsukuku
                     string error_domain_code = @"$(error_domain).$(error_code)";
                     if (error_domain_code == "SaturatedGnodeError.GENERIC")
                         throw new SaturatedGnodeError.GENERIC(error_message);
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 if (ret is ISerializable)
