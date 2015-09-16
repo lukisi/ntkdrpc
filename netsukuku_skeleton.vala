@@ -45,7 +45,7 @@ namespace Netsukuku
             public abstract void forward_peer_message(IPeerMessage peer_message, CallerInfo? caller=null);
             public abstract IPeersRequest get_request(int msg_id, IPeerTupleNode respondant, CallerInfo? caller=null) throws PeersUnknownMessageError, PeersInvalidRequest;
             public abstract void set_response(int msg_id, IPeersResponse response, CallerInfo? caller=null);
-            public abstract void set_refuse_execute(int msg_id, string error_message, CallerInfo? caller=null);
+            public abstract void set_refuse_message(int msg_id, string refuse_message, CallerInfo? caller=null);
             public abstract void set_next_destination(int msg_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
             public abstract void set_failure(int msg_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
             public abstract void set_non_participant(int msg_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
@@ -662,7 +662,7 @@ namespace Netsukuku
                         addr.peers_manager.set_response(arg0, arg1, caller_info);
                         ret = prepare_return_value_null();
                     }
-                    else if (m_name == "addr.peers_manager.set_refuse_execute")
+                    else if (m_name == "addr.peers_manager.set_refuse_message")
                     {
                         if (args.size != 2) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
 
@@ -691,8 +691,8 @@ namespace Netsukuku
                             j++;
                         }
                         {
-                            // deserialize arg1 (string error_message)
-                            string arg_name = "error_message";
+                            // deserialize arg1 (string refuse_message)
+                            string arg_name = "refuse_message";
                             string doing = @"Reading argument '$(arg_name)' for $(m_name)";
                             try {
                                 arg1 = read_argument_string_notnull(args[j]);
@@ -706,7 +706,7 @@ namespace Netsukuku
                             j++;
                         }
 
-                        addr.peers_manager.set_refuse_execute(arg0, arg1, caller_info);
+                        addr.peers_manager.set_refuse_message(arg0, arg1, caller_info);
                         ret = prepare_return_value_null();
                     }
                     else if (m_name == "addr.peers_manager.set_next_destination")

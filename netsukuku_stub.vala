@@ -45,7 +45,7 @@ namespace Netsukuku
             public abstract void forward_peer_message(IPeerMessage peer_message) throws StubError, DeserializeError;
             public abstract IPeersRequest get_request(int msg_id, IPeerTupleNode respondant) throws PeersUnknownMessageError, PeersInvalidRequest, StubError, DeserializeError;
             public abstract void set_response(int msg_id, IPeersResponse response) throws StubError, DeserializeError;
-            public abstract void set_refuse_execute(int msg_id, string error_message) throws StubError, DeserializeError;
+            public abstract void set_refuse_message(int msg_id, string refuse_message) throws StubError, DeserializeError;
             public abstract void set_next_destination(int msg_id, IPeerTupleGNode tuple) throws StubError, DeserializeError;
             public abstract void set_failure(int msg_id, IPeerTupleGNode tuple) throws StubError, DeserializeError;
             public abstract void set_non_participant(int msg_id, IPeerTupleGNode tuple) throws StubError, DeserializeError;
@@ -810,16 +810,16 @@ namespace Netsukuku
                 return;
             }
 
-            public void set_refuse_execute(int arg0, string arg1) throws StubError, DeserializeError
+            public void set_refuse_message(int arg0, string arg1) throws StubError, DeserializeError
             {
-                string m_name = "addr.peers_manager.set_refuse_execute";
+                string m_name = "addr.peers_manager.set_refuse_message";
                 ArrayList<string> args = new ArrayList<string>();
                 {
                     // serialize arg0 (int msg_id)
                     args.add(prepare_argument_int64(arg0));
                 }
                 {
-                    // serialize arg1 (string error_message)
+                    // serialize arg1 (string refuse_message)
                     args.add(prepare_argument_string(arg1));
                 }
 
