@@ -33,8 +33,8 @@ AddressManager addr
   IPeerParticipantSet get_participant_set(int lvl) throws PeersInvalidRequest
   void forward_peer_message(IPeerMessage peer_message)
   IPeersRequest get_request(int msg_id, IPeerTupleNode respondant) throws PeersUnknownMessageError, PeersInvalidRequest
-  void set_response(int msg_id, IPeersResponse response)
-  void set_refuse_message(int msg_id, string refuse_message)
+  void set_response(int msg_id, IPeersResponse response, IPeerTupleNode respondant)
+  void set_refuse_message(int msg_id, string refuse_message, IPeerTupleNode respondant)
   void set_next_destination(int msg_id, IPeerTupleGNode tuple)
   void set_failure(int msg_id, IPeerTupleGNode tuple)
   void set_non_participant(int msg_id, IPeerTupleGNode tuple)
