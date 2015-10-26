@@ -46,6 +46,7 @@ namespace Netsukuku
             public abstract IPeersRequest get_request(int msg_id, IPeerTupleNode respondant, CallerInfo? caller=null) throws PeersUnknownMessageError, PeersInvalidRequest;
             public abstract void set_response(int msg_id, IPeersResponse response, IPeerTupleNode respondant, CallerInfo? caller=null);
             public abstract void set_refuse_message(int msg_id, string refuse_message, IPeerTupleNode respondant, CallerInfo? caller=null);
+            public abstract void set_redo_from_start(int msg_id, IPeerTupleNode respondant, CallerInfo? caller=null);
             public abstract void set_next_destination(int msg_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
             public abstract void set_failure(int msg_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
             public abstract void set_non_participant(int msg_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
@@ -749,6 +750,58 @@ namespace Netsukuku
                         }
 
                         addr.peers_manager.set_refuse_message(arg0, arg1, arg2, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.peers_manager.set_redo_from_start")
+                    {
+                        if (args.size != 2) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        int arg0;
+                        IPeerTupleNode arg1;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (int msg_id)
+                            string arg_name = "msg_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                if (val > int.MAX || val < int.MIN)
+                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
+                                arg0 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg1 (IPeerTupleNode respondant)
+                            string arg_name = "respondant";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IPeerTupleNode), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg1 = (IPeerTupleNode)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.peers_manager.set_redo_from_start(arg0, arg1, caller_info);
                         ret = prepare_return_value_null();
                     }
                     else if (m_name == "addr.peers_manager.set_next_destination")
