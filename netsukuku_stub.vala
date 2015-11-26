@@ -55,8 +55,8 @@ namespace Netsukuku
 
         public interface ICoordinatorManagerStub : Object
         {
-            public abstract ICoordinatorNeighborMapMessage retrieve_neighbor_map() throws StubError, DeserializeError;
-            public abstract ICoordinatorReservationMessage ask_reservation(int lvl) throws SaturatedGnodeError, StubError, DeserializeError;
+            public abstract ICoordinatorNeighborMapMessage retrieve_neighbor_map() throws CoordinatorNodeNotReadyError, StubError, DeserializeError;
+            public abstract ICoordinatorReservationMessage ask_reservation(int lvl) throws CoordinatorNodeNotReadyError, CoordinatorInvalidLevelError, CoordinatorSaturatedGnodeError, StubError, DeserializeError;
         }
 
         public interface IAddressManagerStub : Object
@@ -1099,7 +1099,7 @@ namespace Netsukuku
                 this.rmt = rmt;
             }
 
-            public ICoordinatorNeighborMapMessage retrieve_neighbor_map() throws StubError, DeserializeError
+            public ICoordinatorNeighborMapMessage retrieve_neighbor_map() throws CoordinatorNodeNotReadyError, StubError, DeserializeError
             {
                 string m_name = "addr.coordinator_manager.retrieve_neighbor_map";
                 ArrayList<string> args = new ArrayList<string>();
@@ -1128,6 +1128,8 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "CoordinatorNodeNotReadyError.GENERIC")
+                        throw new CoordinatorNodeNotReadyError.GENERIC(error_message);
                     if (error_domain_code == "DeserializeError.GENERIC")
                         throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
@@ -1138,7 +1140,7 @@ namespace Netsukuku
                 return (ICoordinatorNeighborMapMessage)ret;
             }
 
-            public ICoordinatorReservationMessage ask_reservation(int arg0) throws SaturatedGnodeError, StubError, DeserializeError
+            public ICoordinatorReservationMessage ask_reservation(int arg0) throws CoordinatorNodeNotReadyError, CoordinatorInvalidLevelError, CoordinatorSaturatedGnodeError, StubError, DeserializeError
             {
                 string m_name = "addr.coordinator_manager.ask_reservation";
                 ArrayList<string> args = new ArrayList<string>();
@@ -1171,8 +1173,12 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
-                    if (error_domain_code == "SaturatedGnodeError.GENERIC")
-                        throw new SaturatedGnodeError.GENERIC(error_message);
+                    if (error_domain_code == "CoordinatorNodeNotReadyError.GENERIC")
+                        throw new CoordinatorNodeNotReadyError.GENERIC(error_message);
+                    if (error_domain_code == "CoordinatorInvalidLevelError.GENERIC")
+                        throw new CoordinatorInvalidLevelError.GENERIC(error_message);
+                    if (error_domain_code == "CoordinatorSaturatedGnodeError.GENERIC")
+                        throw new CoordinatorSaturatedGnodeError.GENERIC(error_message);
                     if (error_domain_code == "DeserializeError.GENERIC")
                         throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");

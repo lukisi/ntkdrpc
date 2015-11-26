@@ -55,8 +55,8 @@ namespace Netsukuku
 
         public interface ICoordinatorManagerSkeleton : Object
         {
-            public abstract ICoordinatorNeighborMapMessage retrieve_neighbor_map(CallerInfo? caller=null);
-            public abstract ICoordinatorReservationMessage ask_reservation(int lvl, CallerInfo? caller=null) throws SaturatedGnodeError;
+            public abstract ICoordinatorNeighborMapMessage retrieve_neighbor_map(CallerInfo? caller=null) throws CoordinatorNodeNotReadyError;
+            public abstract ICoordinatorReservationMessage ask_reservation(int lvl, CallerInfo? caller=null) throws CoordinatorNodeNotReadyError, CoordinatorInvalidLevelError, CoordinatorSaturatedGnodeError;
         }
 
         public interface IAddressManagerSkeleton : Object
@@ -1024,8 +1024,15 @@ namespace Netsukuku
                         if (args.size != 0) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
 
 
-                        ICoordinatorNeighborMapMessage result = addr.coordinator_manager.retrieve_neighbor_map(caller_info);
-                        ret = prepare_return_value_object(result);
+                        try {
+                            ICoordinatorNeighborMapMessage result = addr.coordinator_manager.retrieve_neighbor_map(caller_info);
+                            ret = prepare_return_value_object(result);
+                        } catch (CoordinatorNodeNotReadyError e) {
+                            string code = "";
+                            if (e is CoordinatorNodeNotReadyError.GENERIC) code = "GENERIC";
+                            assert(code != "");
+                            ret = prepare_error("CoordinatorNodeNotReadyError", code, e.message);
+                        }
                     }
                     else if (m_name == "addr.coordinator_manager.ask_reservation")
                     {
@@ -1058,11 +1065,21 @@ namespace Netsukuku
                         try {
                             ICoordinatorReservationMessage result = addr.coordinator_manager.ask_reservation(arg0, caller_info);
                             ret = prepare_return_value_object(result);
-                        } catch (SaturatedGnodeError e) {
+                        } catch (CoordinatorNodeNotReadyError e) {
                             string code = "";
-                            if (e is SaturatedGnodeError.GENERIC) code = "GENERIC";
+                            if (e is CoordinatorNodeNotReadyError.GENERIC) code = "GENERIC";
                             assert(code != "");
-                            ret = prepare_error("SaturatedGnodeError", code, e.message);
+                            ret = prepare_error("CoordinatorNodeNotReadyError", code, e.message);
+                        } catch (CoordinatorInvalidLevelError e) {
+                            string code = "";
+                            if (e is CoordinatorInvalidLevelError.GENERIC) code = "GENERIC";
+                            assert(code != "");
+                            ret = prepare_error("CoordinatorInvalidLevelError", code, e.message);
+                        } catch (CoordinatorSaturatedGnodeError e) {
+                            string code = "";
+                            if (e is CoordinatorSaturatedGnodeError.GENERIC) code = "GENERIC";
+                            assert(code != "");
+                            ret = prepare_error("CoordinatorSaturatedGnodeError", code, e.message);
                         }
                     }
                     else
