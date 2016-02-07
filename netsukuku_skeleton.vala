@@ -24,10 +24,10 @@ namespace Netsukuku
 {
         public interface INeighborhoodManagerSkeleton : Object
         {
-            public abstract void here_i_am(INeighborhoodNodeID my_id, string mac, string nic_addr, CallerInfo? caller=null);
-            public abstract void request_arc(INeighborhoodNodeID my_id, string mac, string nic_addr, CallerInfo? caller=null) throws NeighborhoodRequestArcError;
+            public abstract void here_i_am(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr, CallerInfo? caller=null);
+            public abstract void request_arc(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr, CallerInfo? caller=null) throws NeighborhoodRequestArcError;
             public abstract uint16 expect_ping(string guid, uint16 peer_port, CallerInfo? caller=null) throws NeighborhoodUnmanagedDeviceError;
-            public abstract void remove_arc(INeighborhoodNodeID my_id, string mac, string nic_addr, CallerInfo? caller=null);
+            public abstract void remove_arc(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr, CallerInfo? caller=null);
             public abstract void nop(CallerInfo? caller=null);
         }
 
@@ -104,22 +104,22 @@ namespace Netsukuku
                         if (args.size != 3) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
 
                         // arguments:
-                        INeighborhoodNodeID arg0;
+                        INeighborhoodNodeIDMessage arg0;
                         string arg1;
                         string arg2;
                         // position:
                         int j = 0;
                         {
-                            // deserialize arg0 (INeighborhoodNodeID my_id)
+                            // deserialize arg0 (INeighborhoodNodeIDMessage my_id)
                             string arg_name = "my_id";
                             string doing = @"Reading argument '$(arg_name)' for $(m_name)";
                             try {
                                 Object val;
-                                val = read_argument_object_notnull(typeof(INeighborhoodNodeID), args[j]);
+                                val = read_argument_object_notnull(typeof(INeighborhoodNodeIDMessage), args[j]);
                                 if (val is ISerializable)
                                     if (!((ISerializable)val).check_deserialization())
                                         throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
-                                arg0 = (INeighborhoodNodeID)val;
+                                arg0 = (INeighborhoodNodeIDMessage)val;
                             } catch (HelperNotJsonError e) {
                                 critical(@"Error parsing JSON for argument: $(e.message)");
                                 critical(@" method-name: $(m_name)");
@@ -168,22 +168,22 @@ namespace Netsukuku
                         if (args.size != 3) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
 
                         // arguments:
-                        INeighborhoodNodeID arg0;
+                        INeighborhoodNodeIDMessage arg0;
                         string arg1;
                         string arg2;
                         // position:
                         int j = 0;
                         {
-                            // deserialize arg0 (INeighborhoodNodeID my_id)
+                            // deserialize arg0 (INeighborhoodNodeIDMessage my_id)
                             string arg_name = "my_id";
                             string doing = @"Reading argument '$(arg_name)' for $(m_name)";
                             try {
                                 Object val;
-                                val = read_argument_object_notnull(typeof(INeighborhoodNodeID), args[j]);
+                                val = read_argument_object_notnull(typeof(INeighborhoodNodeIDMessage), args[j]);
                                 if (val is ISerializable)
                                     if (!((ISerializable)val).check_deserialization())
                                         throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
-                                arg0 = (INeighborhoodNodeID)val;
+                                arg0 = (INeighborhoodNodeIDMessage)val;
                             } catch (HelperNotJsonError e) {
                                 critical(@"Error parsing JSON for argument: $(e.message)");
                                 critical(@" method-name: $(m_name)");
@@ -296,22 +296,22 @@ namespace Netsukuku
                         if (args.size != 3) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
 
                         // arguments:
-                        INeighborhoodNodeID arg0;
+                        INeighborhoodNodeIDMessage arg0;
                         string arg1;
                         string arg2;
                         // position:
                         int j = 0;
                         {
-                            // deserialize arg0 (INeighborhoodNodeID my_id)
+                            // deserialize arg0 (INeighborhoodNodeIDMessage my_id)
                             string arg_name = "my_id";
                             string doing = @"Reading argument '$(arg_name)' for $(m_name)";
                             try {
                                 Object val;
-                                val = read_argument_object_notnull(typeof(INeighborhoodNodeID), args[j]);
+                                val = read_argument_object_notnull(typeof(INeighborhoodNodeIDMessage), args[j]);
                                 if (val is ISerializable)
                                     if (!((ISerializable)val).check_deserialization())
                                         throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
-                                arg0 = (INeighborhoodNodeID)val;
+                                arg0 = (INeighborhoodNodeIDMessage)val;
                             } catch (HelperNotJsonError e) {
                                 critical(@"Error parsing JSON for argument: $(e.message)");
                                 critical(@" method-name: $(m_name)");

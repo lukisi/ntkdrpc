@@ -23,10 +23,10 @@ namespace Netsukuku
 {
         public interface INeighborhoodManagerStub : Object
         {
-            public abstract void here_i_am(INeighborhoodNodeID my_id, string mac, string nic_addr) throws StubError, DeserializeError;
-            public abstract void request_arc(INeighborhoodNodeID my_id, string mac, string nic_addr) throws NeighborhoodRequestArcError, StubError, DeserializeError;
+            public abstract void here_i_am(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr) throws StubError, DeserializeError;
+            public abstract void request_arc(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr) throws NeighborhoodRequestArcError, StubError, DeserializeError;
             public abstract uint16 expect_ping(string guid, uint16 peer_port) throws NeighborhoodUnmanagedDeviceError, StubError, DeserializeError;
-            public abstract void remove_arc(INeighborhoodNodeID my_id, string mac, string nic_addr) throws StubError, DeserializeError;
+            public abstract void remove_arc(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr) throws StubError, DeserializeError;
             public abstract void nop() throws StubError, DeserializeError;
         }
 
@@ -278,12 +278,12 @@ namespace Netsukuku
                 this.rmt = rmt;
             }
 
-            public void here_i_am(INeighborhoodNodeID arg0, string arg1, string arg2) throws StubError, DeserializeError
+            public void here_i_am(INeighborhoodNodeIDMessage arg0, string arg1, string arg2) throws StubError, DeserializeError
             {
                 string m_name = "addr.neighborhood_manager.here_i_am";
                 ArrayList<string> args = new ArrayList<string>();
                 {
-                    // serialize arg0 (INeighborhoodNodeID my_id)
+                    // serialize arg0 (INeighborhoodNodeIDMessage my_id)
                     args.add(prepare_argument_object(arg0));
                 }
                 {
@@ -327,12 +327,12 @@ namespace Netsukuku
                 return;
             }
 
-            public void request_arc(INeighborhoodNodeID arg0, string arg1, string arg2) throws NeighborhoodRequestArcError, StubError, DeserializeError
+            public void request_arc(INeighborhoodNodeIDMessage arg0, string arg1, string arg2) throws NeighborhoodRequestArcError, StubError, DeserializeError
             {
                 string m_name = "addr.neighborhood_manager.request_arc";
                 ArrayList<string> args = new ArrayList<string>();
                 {
-                    // serialize arg0 (INeighborhoodNodeID my_id)
+                    // serialize arg0 (INeighborhoodNodeIDMessage my_id)
                     args.add(prepare_argument_object(arg0));
                 }
                 {
@@ -434,12 +434,12 @@ namespace Netsukuku
                 return ret;
             }
 
-            public void remove_arc(INeighborhoodNodeID arg0, string arg1, string arg2) throws StubError, DeserializeError
+            public void remove_arc(INeighborhoodNodeIDMessage arg0, string arg1, string arg2) throws StubError, DeserializeError
             {
                 string m_name = "addr.neighborhood_manager.remove_arc";
                 ArrayList<string> args = new ArrayList<string>();
                 {
-                    // serialize arg0 (INeighborhoodNodeID my_id)
+                    // serialize arg0 (INeighborhoodNodeIDMessage my_id)
                     args.add(prepare_argument_object(arg0));
                 }
                 {

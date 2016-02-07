@@ -21,10 +21,10 @@ interfaces.rpcidl
 ==========================================
 AddressManager addr
  NeighborhoodManager neighborhood_manager
-  void here_i_am(INeighborhoodNodeID my_id, string mac, string nic_addr)
-  void request_arc(INeighborhoodNodeID my_id, string mac, string nic_addr) throws NeighborhoodRequestArcError
+  void here_i_am(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr)
+  void request_arc(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr) throws NeighborhoodRequestArcError
   uint16 expect_ping(string guid, uint16 peer_port) throws NeighborhoodUnmanagedDeviceError
-  void remove_arc(INeighborhoodNodeID my_id, string mac, string nic_addr)
+  void remove_arc(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr)
   void nop()
  QspnManager qspn_manager
   IQspnEtpMessage get_full_etp(IQspnAddress requesting_address) throws QspnNotAcceptedError, QspnBootstrapInProgressError
@@ -101,7 +101,7 @@ namespace Netsukuku
         GENERIC,
     }
 
-    public interface INeighborhoodNodeID : Object
+    public interface INeighborhoodNodeIDMessage : Object
     {
     }
 
