@@ -48,8 +48,8 @@ libntkdrpc_la_VALAFLAGS = \
 	--library ntkdrpc \
 	--pkg gee-0.8 \
 	--pkg json-glib-1.0 \
+	--pkg tasklet-system \
 	--pkg zcd \
-	--pkg zcd-tasklet-system \
 	$(NULL)
 
 libntkdrpc_la_CPPFLAGS = \
@@ -57,6 +57,7 @@ libntkdrpc_la_CPPFLAGS = \
 	$(GOBJECT_CFLAGS) \
 	$(GEE_CFLAGS) \
 	$(JSON_CFLAGS) \
+	$(TASKLETSYSTEM_CFLAGS) \
 	$(ZCD_CFLAGS) \
 	$(NULL)
 
@@ -64,6 +65,7 @@ libntkdrpc_la_LIBADD = \
 	$(GOBJECT_LIBS) \
 	$(GEE_LIBS) \
 	$(JSON_LIBS) \
+	$(TASKLETSYSTEM_LIBS) \
 	$(ZCD_LIBS) \
 	$(builddir)/libhelperrpc.la \
 	$(NULL)

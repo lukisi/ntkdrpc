@@ -1,6 +1,6 @@
 /*
  *  This file is part of Netsukuku.
- *  (c) Copyright 2015 Luca Dionisi aka lukisi <luca.dionisi@gmail.com>
+ *  (c) Copyright 2015-2016 Luca Dionisi aka lukisi <luca.dionisi@gmail.com>
  *
  *  Netsukuku is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,12 +18,10 @@
 
 using Gee;
 using zcd;
-using zcd.ModRpc;
+using TaskletSystem;
 
 namespace Netsukuku
 {
-    namespace ModRpc
-    {
         public interface INeighborhoodManagerSkeleton : Object
         {
             public abstract void here_i_am(INeighborhoodNodeID my_id, string mac, string nic_addr, CallerInfo? caller=null);
@@ -73,7 +71,7 @@ namespace Netsukuku
 
         public interface IRpcDelegate : Object
         {
-            public abstract IAddressManagerSkeleton? get_addr(CallerInfo caller);
+            public abstract Gee.List<IAddressManagerSkeleton> get_addr_set(CallerInfo caller);
         }
 
         internal errordomain InSkeletonDeserializeError {
@@ -85,17 +83,18 @@ namespace Netsukuku
             private string m_name;
             private ArrayList<string> args;
             private CallerInfo caller_info;
-            private IAddressManagerSkeleton addr;
-            public ZcdAddressManagerDispatcher(IAddressManagerSkeleton addr, string m_name, Gee.List<string> args, CallerInfo caller_info)
+            private Gee.List<IAddressManagerSkeleton> addr_set;
+            public ZcdAddressManagerDispatcher(Gee.List<IAddressManagerSkeleton> addr_set, string m_name, Gee.List<string> args, CallerInfo caller_info)
             {
-                this.addr = addr;
+                this.addr_set = new ArrayList<IAddressManagerSkeleton>();
+                this.addr_set.add_all(addr_set);
                 this.m_name = m_name;
                 this.args = new ArrayList<string>();
                 this.args.add_all(args);
                 this.caller_info = caller_info;
             }
 
-            private string execute_or_throw_deserialize() throws InSkeletonDeserializeError
+            private string execute_or_throw_deserialize(IAddressManagerSkeleton addr) throws InSkeletonDeserializeError
             {
                 string ret;
                 if (m_name.has_prefix("addr.neighborhood_manager."))
@@ -1096,14 +1095,43 @@ namespace Netsukuku
 
             public string execute()
             {
-                string ret;
-                try {
-                    ret = execute_or_throw_deserialize();
-                } catch(InSkeletonDeserializeError e) {
-                    ret = prepare_error("DeserializeError", "GENERIC", e.message);
+                assert(! addr_set.is_empty);
+                string ret = "";
+                if (addr_set.size == 1)
+                {
+                    try {
+                        ret = execute_or_throw_deserialize(addr_set[0]);
+                    } catch(InSkeletonDeserializeError e) {
+                        ret = prepare_error("DeserializeError", "GENERIC", e.message);
+                    }
+                }
+                else
+                {
+                    foreach (var addr in addr_set)
+                    {
+                        try {
+                            execute_or_throw_deserialize(addr);
+                        } catch(InSkeletonDeserializeError e) {
+                        }
+                    }
                 }
                 return ret;
             }
+        }
+
+        public class TcpclientCallerInfo : CallerInfo
+        {
+            internal TcpclientCallerInfo(string my_address, string peer_address, ISourceID sourceid, IUnicastID unicastid)
+            {
+                this.my_address = my_address;
+                this.peer_address = peer_address;
+                this.sourceid = sourceid;
+                this.unicastid = unicastid;
+            }
+            public string my_address {get; private set;}
+            public string peer_address {get; private set;}
+            public ISourceID sourceid {get; private set;}
+            public IUnicastID unicastid {get; private set;}
         }
 
         internal class ZcdTcpDelegate : Object, IZcdTcpDelegate
@@ -1126,7 +1154,8 @@ namespace Netsukuku
             private IRpcDelegate dlg;
             private string m_name;
             private ArrayList<string> args;
-            private zcd.ModRpc.TcpCallerInfo? caller_info;
+            private string unicast_id;
+            private TcpclientCallerInfo? caller_info;
             public ZcdTcpRequestHandler(IRpcDelegate dlg)
             {
                 this.dlg = dlg;
@@ -1145,24 +1174,82 @@ namespace Netsukuku
                 args.add(arg);
             }
 
-            public void set_caller_info(zcd.TcpCallerInfo caller_info)
+            public void set_unicast_id (string unicast_id)
             {
-                this.caller_info = new zcd.ModRpc.TcpCallerInfo(caller_info.my_addr, caller_info.peer_addr);
+                this.unicast_id = unicast_id;
+            }
+
+            public void set_caller_info(TcpCallerInfo caller_info)
+            {
+                ISourceID sourceid;
+                IUnicastID unicastid;
+               {
+                // deserialize IUnicastID unicastid
+                Object val;
+                try {
+                    val = read_direct_object_notnull(typeof(IUnicastID), unicast_id);
+                } catch (HelperNotJsonError e) {
+                    critical(@"Error parsing JSON for unicast_id: $(e.message)");
+                    error(   @" unicast_id: $(unicast_id)");
+                } catch (HelperDeserializeError e) {
+                    // couldn't verify if it's for me
+                    warning(@"get_dispatcher_unicast: couldn't verify if it's for me: $(e.message)");
+                    return;
+                }
+                if (val is ISerializable)
+                {
+                    if (!((ISerializable)val).check_deserialization())
+                    {
+                        // couldn't verify if it's for me
+                        warning(@"get_dispatcher_unicast: couldn't verify if it's for me: bad deserialization");
+                        return;
+                    }
+                }
+                unicastid = (IUnicastID)val;
+               }
+               {
+                // deserialize ISourceID sourceid
+                Object val;
+                try {
+                    val = read_direct_object_notnull(typeof(ISourceID), caller_info.source_id);
+                } catch (HelperNotJsonError e) {
+                    critical(@"Error parsing JSON for source_id: $(e.message)");
+                    error(   @" unicast_id: $(caller_info.source_id)");
+                } catch (HelperDeserializeError e) {
+                    // couldn't verify whom it's from
+                    warning(@"get_dispatcher_unicast: couldn't verify whom it's from: $(e.message)");
+                    return;
+                }
+                if (val is ISerializable)
+                {
+                    if (!((ISerializable)val).check_deserialization())
+                    {
+                        // couldn't verify if it's for me
+                        warning(@"get_dispatcher_unicast: couldn't verify whom it's from: bad deserialization");
+                        return;
+                    }
+                }
+                sourceid = (ISourceID)val;
+               }
+                this.caller_info = new TcpclientCallerInfo(caller_info.my_address, caller_info.peer_address, sourceid, unicastid);
             }
 
             public IZcdDispatcher? get_dispatcher()
             {
-                IZcdDispatcher ret;
+                IZcdDispatcher? ret = null;
+              if (caller_info != null)
+              {
                 if (m_name.has_prefix("addr."))
                 {
-                    IAddressManagerSkeleton? addr = dlg.get_addr(caller_info);
-                    if (addr == null) ret = null;
-                    else ret = new ZcdAddressManagerDispatcher(addr, m_name, args, caller_info);
+                    Gee.List<IAddressManagerSkeleton> addr_set = dlg.get_addr_set(caller_info);
+                    if (addr_set.is_empty) ret = null;
+                    else ret = new ZcdAddressManagerDispatcher(addr_set, m_name, args, caller_info);
                 }
                 else
                 {
                     ret = new ZcdDispatcherForError("DeserializeError", "GENERIC", @"Unknown root in method name: \"$(m_name)\"");
                 }
+              }
                 args = new ArrayList<string>();
                 m_name = "";
                 caller_info = null;
@@ -1173,28 +1260,32 @@ namespace Netsukuku
 
         public class UnicastCallerInfo : CallerInfo
         {
-            public UnicastCallerInfo(string dev, string peer_address, UnicastID unicastid)
+            internal UnicastCallerInfo(string dev, string peer_address, ISourceID sourceid, IUnicastID unicastid)
             {
                 this.dev = dev;
                 this.peer_address = peer_address;
+                this.sourceid = sourceid;
                 this.unicastid = unicastid;
             }
             public string dev {get; private set;}
             public string peer_address {get; private set;}
-            public UnicastID unicastid {get; private set;}
+            public ISourceID sourceid {get; private set;}
+            public IUnicastID unicastid {get; private set;}
         }
 
         public class BroadcastCallerInfo : CallerInfo
         {
-            public BroadcastCallerInfo(string dev, string peer_address, BroadcastID broadcastid)
+            internal BroadcastCallerInfo(string dev, string peer_address, ISourceID sourceid, IBroadcastID broadcastid)
             {
                 this.dev = dev;
                 this.peer_address = peer_address;
+                this.sourceid = sourceid;
                 this.broadcastid = broadcastid;
             }
             public string dev {get; private set;}
             public string peer_address {get; private set;}
-            public BroadcastID broadcastid {get; private set;}
+            public ISourceID sourceid {get; private set;}
+            public IBroadcastID broadcastid {get; private set;}
         }
 
         internal class ZcdUdpRequestMessageDelegate : Object, IZcdUdpRequestMessageDelegate
@@ -1208,12 +1299,15 @@ namespace Netsukuku
             public IZcdDispatcher? get_dispatcher_unicast(
                 int id, string unicast_id,
                 string m_name, Gee.List<string> arguments,
-                zcd.UdpCallerInfo caller_info)
+                UdpCallerInfo caller_info)
             {
-                // deserialize UnicastID unicastid
+                ISourceID sourceid;
+                IUnicastID unicastid;
+               {
+                // deserialize IUnicastID unicastid
                 Object val;
                 try {
-                    val = read_direct_object_notnull(typeof(UnicastID), unicast_id);
+                    val = read_direct_object_notnull(typeof(IUnicastID), unicast_id);
                 } catch (HelperNotJsonError e) {
                     critical(@"Error parsing JSON for unicast_id: $(e.message)");
                     error(   @" unicast_id: $(unicast_id)");
@@ -1231,15 +1325,40 @@ namespace Netsukuku
                         return null;
                     }
                 }
-                UnicastID unicastid = (UnicastID)val;
+                unicastid = (IUnicastID)val;
+               }
+               {
+                // deserialize ISourceID sourceid
+                Object val;
+                try {
+                    val = read_direct_object_notnull(typeof(ISourceID), caller_info.source_id);
+                } catch (HelperNotJsonError e) {
+                    critical(@"Error parsing JSON for source_id: $(e.message)");
+                    error(   @" unicast_id: $(caller_info.source_id)");
+                } catch (HelperDeserializeError e) {
+                    // couldn't verify whom it's from
+                    warning(@"get_dispatcher_unicast: couldn't verify whom it's from: $(e.message)");
+                    return null;
+                }
+                if (val is ISerializable)
+                {
+                    if (!((ISerializable)val).check_deserialization())
+                    {
+                        // couldn't verify if it's for me
+                        warning(@"get_dispatcher_unicast: couldn't verify whom it's from: bad deserialization");
+                        return null;
+                    }
+                }
+                sourceid = (ISourceID)val;
+               }
                 // call delegate
-                UnicastCallerInfo my_caller_info = new UnicastCallerInfo(caller_info.dev, caller_info.peer_addr, unicastid);
+                UnicastCallerInfo my_caller_info = new UnicastCallerInfo(caller_info.dev, caller_info.peer_address, sourceid, unicastid);
                 IZcdDispatcher ret;
                 if (m_name.has_prefix("addr."))
                 {
-                    IAddressManagerSkeleton? addr = dlg.get_addr(my_caller_info);
-                    if (addr == null) ret = null;
-                    else ret = new ZcdAddressManagerDispatcher(addr, m_name, arguments, my_caller_info);
+                    Gee.List<IAddressManagerSkeleton> addr_set = dlg.get_addr_set(my_caller_info);
+                    if (addr_set.is_empty) ret = null;
+                    else ret = new ZcdAddressManagerDispatcher(addr_set, m_name, arguments, my_caller_info);
                 }
                 else
                 {
@@ -1251,12 +1370,15 @@ namespace Netsukuku
             public IZcdDispatcher? get_dispatcher_broadcast(
                 int id, string broadcast_id,
                 string m_name, Gee.List<string> arguments,
-                zcd.UdpCallerInfo caller_info)
+                UdpCallerInfo caller_info)
             {
-                // deserialize BroadcastID broadcastid
+                ISourceID sourceid;
+                IBroadcastID broadcastid;
+               {
+                // deserialize IBroadcastID broadcastid
                 Object val;
                 try {
-                    val = read_direct_object_notnull(typeof(BroadcastID), broadcast_id);
+                    val = read_direct_object_notnull(typeof(IBroadcastID), broadcast_id);
                 } catch (HelperNotJsonError e) {
                     critical(@"Error parsing JSON for broadcast_id: $(e.message)");
                     error(   @" broadcast_id: $(broadcast_id)");
@@ -1274,15 +1396,40 @@ namespace Netsukuku
                         return null;
                     }
                 }
-                BroadcastID broadcastid = (BroadcastID)val;
+                broadcastid = (IBroadcastID)val;
+               }
+               {
+                // deserialize ISourceID sourceid
+                Object val;
+                try {
+                    val = read_direct_object_notnull(typeof(ISourceID), caller_info.source_id);
+                } catch (HelperNotJsonError e) {
+                    critical(@"Error parsing JSON for source_id: $(e.message)");
+                    error(   @" unicast_id: $(caller_info.source_id)");
+                } catch (HelperDeserializeError e) {
+                    // couldn't verify whom it's from
+                    warning(@"get_dispatcher_unicast: couldn't verify whom it's from: $(e.message)");
+                    return null;
+                }
+                if (val is ISerializable)
+                {
+                    if (!((ISerializable)val).check_deserialization())
+                    {
+                        // couldn't verify if it's for me
+                        warning(@"get_dispatcher_unicast: couldn't verify whom it's from: bad deserialization");
+                        return null;
+                    }
+                }
+                sourceid = (ISourceID)val;
+               }
                 // call delegate
-                BroadcastCallerInfo my_caller_info = new BroadcastCallerInfo(caller_info.dev, caller_info.peer_addr, broadcastid);
+                BroadcastCallerInfo my_caller_info = new BroadcastCallerInfo(caller_info.dev, caller_info.peer_address, sourceid, broadcastid);
                 IZcdDispatcher ret;
                 if (m_name.has_prefix("addr."))
                 {
-                    IAddressManagerSkeleton? addr = dlg.get_addr(my_caller_info);
-                    if (addr == null) ret = null;
-                    else ret = new ZcdAddressManagerDispatcher(addr, m_name, arguments, my_caller_info);
+                    Gee.List<IAddressManagerSkeleton> addr_set = dlg.get_addr_set(my_caller_info);
+                    if (addr_set.is_empty) ret = null;
+                    else ret = new ZcdAddressManagerDispatcher(addr_set, m_name, arguments, my_caller_info);
                 }
                 else
                 {
@@ -1292,12 +1439,12 @@ namespace Netsukuku
             }
         }
 
-        public IZcdTaskletHandle tcp_listen(IRpcDelegate dlg, IRpcErrorHandler err, uint16 port, string? my_addr=null)
+        public ITaskletHandle tcp_listen(IRpcDelegate dlg, IRpcErrorHandler err, uint16 port, string? my_addr=null)
         {
             return zcd.tcp_listen(new ZcdTcpDelegate(dlg), new ZcdTcpAcceptErrorHandler(err), port, my_addr);
         }
 
-        public IZcdTaskletHandle udp_listen(IRpcDelegate dlg, IRpcErrorHandler err, uint16 port, string dev)
+        public ITaskletHandle udp_listen(IRpcDelegate dlg, IRpcErrorHandler err, uint16 port, string dev)
         {
             if (map_udp_listening == null) map_udp_listening = new HashMap<string, ZcdUdpServiceMessageDelegate>();
             string k_map = @"$(dev):$(port)";
@@ -1307,5 +1454,4 @@ namespace Netsukuku
             map_udp_listening[k_map] = del_ser;
             return zcd.udp_listen(del_req, del_ser, del_err, port, dev);
         }
-    }
 }

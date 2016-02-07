@@ -6,7 +6,7 @@ includedir=@includedir@
 Name: @PACKAGE_NAME@
 Description: Netsukuku mid-level library for RPC.
 Version: @VERSION@
-Requires.private: gee-0.8 json-glib-1.0 zcd-tasklet-system
+Requires.private: gee-0.8 json-glib-1.0 tasklet-system
 Libs: -L${libdir} -lntkdrpc
 Cflags: -I${includedir}
 

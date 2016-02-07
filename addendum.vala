@@ -18,11 +18,10 @@
 
 using Gee;
 using zcd;
-using zcd.ModRpc;
 
 namespace Netsukuku
 {
-    public class UnicastID : Object, Json.Serializable, ISerializable
+    public class UnicastID : Object, IUnicastID, Json.Serializable, ISerializable
     {
         public string mac {get; set;}
         public INeighborhoodNodeID nodeid {get; set;}
@@ -116,7 +115,7 @@ namespace Netsukuku
         }
     }
 
-    public class BroadcastID : Object, Json.Serializable
+    public class BroadcastID : Object, IBroadcastID, Json.Serializable
     {
         // Has the message to be ignored by a certain node?
         public INeighborhoodNodeID? ignore_nodeid {get; set;}

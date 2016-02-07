@@ -1,6 +1,6 @@
 /*
  *  This file is part of Netsukuku.
- *  (c) Copyright 2015 Luca Dionisi aka lukisi <luca.dionisi@gmail.com>
+ *  (c) Copyright 2015-2016 Luca Dionisi aka lukisi <luca.dionisi@gmail.com>
  *
  *  Netsukuku is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -59,7 +59,6 @@ Errors
 
 using Gee;
 using zcd;
-using zcd.ModRpc;
 
 namespace Netsukuku
 {
@@ -104,7 +103,6 @@ namespace Netsukuku
 
     public interface INeighborhoodNodeID : Object
     {
-        public abstract bool i_neighborhood_equals(INeighborhoodNodeID other);
     }
 
     public interface IQspnEtpMessage : Object
@@ -147,16 +145,15 @@ namespace Netsukuku
     {
     }
 
-    /*  Moved to file addendum.vala
-    public class UnicastID : Object
+    public interface ISourceID : Object
     {
     }
-    */
 
-    /*  Moved to file addendum.vala
-    public class BroadcastID : Object
+    public interface IUnicastID : Object
     {
     }
-    */
 
+    public interface IBroadcastID : Object
+    {
+    }
 }

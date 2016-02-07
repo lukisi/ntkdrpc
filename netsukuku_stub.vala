@@ -1,6 +1,6 @@
 /*
  *  This file is part of Netsukuku.
- *  (c) Copyright 2015 Luca Dionisi aka lukisi <luca.dionisi@gmail.com>
+ *  (c) Copyright 2015-2016 Luca Dionisi aka lukisi <luca.dionisi@gmail.com>
  *
  *  Netsukuku is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,12 +18,9 @@
 
 using Gee;
 using zcd;
-using zcd.ModRpc;
 
 namespace Netsukuku
 {
-    namespace ModRpc
-    {
         public interface INeighborhoodManagerStub : Object
         {
             public abstract void here_i_am(INeighborhoodNodeID my_id, string mac, string nic_addr) throws StubError, DeserializeError;
@@ -71,9 +68,9 @@ namespace Netsukuku
             public ICoordinatorManagerStub coordinator_manager {get {return coordinator_manager_getter();}}
         }
 
-        public IAddressManagerStub get_addr_tcp_client(string peer_address, uint16 peer_port)
+        public IAddressManagerStub get_addr_tcp_client(string peer_address, uint16 peer_port, ISourceID source_id, IUnicastID unicast_id)
         {
-            return new AddressManagerTcpClientRootStub(peer_address, peer_port);
+            return new AddressManagerTcpClientRootStub(peer_address, peer_port, source_id, unicast_id);
         }
 
         internal class AddressManagerTcpClientRootStub : Object, IAddressManagerStub, ITcpClientRootStub
@@ -81,17 +78,21 @@ namespace Netsukuku
             private TcpClient client;
             private string peer_address;
             private uint16 peer_port;
+            private string s_source_id;
+            private string s_unicast_id;
             private bool hurry;
             private bool wait_reply;
             private NeighborhoodManagerRemote _neighborhood_manager;
             private QspnManagerRemote _qspn_manager;
             private PeersManagerRemote _peers_manager;
             private CoordinatorManagerRemote _coordinator_manager;
-            public AddressManagerTcpClientRootStub(string peer_address, uint16 peer_port)
+            public AddressManagerTcpClientRootStub(string peer_address, uint16 peer_port, ISourceID source_id, IUnicastID unicast_id)
             {
                 this.peer_address = peer_address;
                 this.peer_port = peer_port;
-                client = tcp_client(peer_address, peer_port);
+                s_source_id = prepare_direct_object(source_id);
+                s_unicast_id = prepare_direct_object(unicast_id);
+                client = tcp_client(peer_address, peer_port, s_source_id, s_unicast_id);
                 hurry = false;
                 wait_reply = true;
                 _neighborhood_manager = new NeighborhoodManagerRemote(this.call);
@@ -144,7 +145,7 @@ namespace Netsukuku
             {
                 if (hurry && !client.is_queue_empty())
                 {
-                    client = tcp_client(peer_address, peer_port);
+                    client = tcp_client(peer_address, peer_port, s_source_id, s_unicast_id);
                 }
                 // TODO See destructor of TcpClient. If the low level library ZCD is able to ensure
                 //  that the destructor is not called when a call is in progress, then this
@@ -156,13 +157,14 @@ namespace Netsukuku
             }
         }
 
-        public IAddressManagerStub get_addr_unicast(string dev, uint16 port, UnicastID unicast_id, bool wait_reply)
+        public IAddressManagerStub get_addr_unicast(string dev, uint16 port, ISourceID source_id, IUnicastID unicast_id, bool wait_reply)
         {
-            return new AddressManagerUnicastRootStub(dev, port, unicast_id, wait_reply);
+            return new AddressManagerUnicastRootStub(dev, port, source_id, unicast_id, wait_reply);
         }
 
         internal class AddressManagerUnicastRootStub : Object, IAddressManagerStub
         {
+            private string s_source_id;
             private string s_unicast_id;
             private string dev;
             private uint16 port;
@@ -171,8 +173,9 @@ namespace Netsukuku
             private QspnManagerRemote _qspn_manager;
             private PeersManagerRemote _peers_manager;
             private CoordinatorManagerRemote _coordinator_manager;
-            public AddressManagerUnicastRootStub(string dev, uint16 port, UnicastID unicast_id, bool wait_reply)
+            public AddressManagerUnicastRootStub(string dev, uint16 port, ISourceID source_id, IUnicastID unicast_id, bool wait_reply)
             {
+                s_source_id = prepare_direct_object(source_id);
                 s_unicast_id = prepare_direct_object(unicast_id);
                 this.dev = dev;
                 this.port = port;
@@ -205,18 +208,19 @@ namespace Netsukuku
 
             private string call(string m_name, Gee.List<string> arguments) throws ZCDError, StubError
             {
-                return call_unicast_udp(m_name, arguments, dev, port, s_unicast_id, wait_reply);
+                return call_unicast_udp(m_name, arguments, dev, port, s_source_id, s_unicast_id, wait_reply);
             }
         }
 
         public IAddressManagerStub get_addr_broadcast
-        (Gee.Collection<string> devs, uint16 port, BroadcastID broadcast_id, IAckCommunicator? notify_ack=null)
+        (Gee.Collection<string> devs, uint16 port, ISourceID source_id, IBroadcastID broadcast_id, IAckCommunicator? notify_ack=null)
         {
-            return new AddressManagerBroadcastRootStub(devs, port, broadcast_id, notify_ack);
+            return new AddressManagerBroadcastRootStub(devs, port, source_id, broadcast_id, notify_ack);
         }
 
         internal class AddressManagerBroadcastRootStub : Object, IAddressManagerStub
         {
+            private string s_source_id;
             private string s_broadcast_id;
             private Gee.Collection<string> devs;
             private uint16 port;
@@ -226,8 +230,9 @@ namespace Netsukuku
             private PeersManagerRemote _peers_manager;
             private CoordinatorManagerRemote _coordinator_manager;
             public AddressManagerBroadcastRootStub
-            (Gee.Collection<string> devs, uint16 port, BroadcastID broadcast_id, IAckCommunicator? notify_ack=null)
+            (Gee.Collection<string> devs, uint16 port, ISourceID source_id, IBroadcastID broadcast_id, IAckCommunicator? notify_ack=null)
             {
+                s_source_id = prepare_direct_object(source_id);
                 s_broadcast_id = prepare_direct_object(broadcast_id);
                 this.devs = new ArrayList<string>();
                 this.devs.add_all(devs);
@@ -261,7 +266,7 @@ namespace Netsukuku
 
             private string call(string m_name, Gee.List<string> arguments) throws ZCDError, StubError
             {
-                return call_broadcast_udp(m_name, arguments, devs, port, s_broadcast_id, notify_ack);
+                return call_broadcast_udp(m_name, arguments, devs, port, s_source_id, s_broadcast_id, notify_ack);
             }
         }
 
@@ -1191,5 +1196,4 @@ namespace Netsukuku
 
         }
 
-    }
 }

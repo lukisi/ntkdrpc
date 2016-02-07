@@ -1,6 +1,6 @@
 /*
  *  This file is part of Netsukuku.
- *  (c) Copyright 2015 Luca Dionisi aka lukisi <luca.dionisi@gmail.com>
+ *  (c) Copyright 2015-2016 Luca Dionisi aka lukisi <luca.dionisi@gmail.com>
  *
  *  Netsukuku is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,10 +18,8 @@
 
 using Gee;
 
-namespace zcd
+namespace Netsukuku
 {
-    namespace ModRpc
-    {
         public errordomain HelperDeserializeError {
             GENERIC
         }
@@ -111,6 +109,9 @@ namespace zcd
                 b.add_string_value(obj.get_type().name());
                 b.set_member_name("value");
                 Json.Node* obj_n = Json.gobject_serialize(obj);
+                // json_builder_add_value docs says: The builder will take ownership of the #JsonNode.
+                // but the vapi does not specify that the formal parameter is owned.
+                // So I try and handle myself the unref of obj_n
                 b.add_value(obj_n);
                 b.end_object();
             }
@@ -971,7 +972,7 @@ namespace zcd
             return cb.ret;
         }
 
-        /* Helper functions to build JSON unicastid and broadcastid */
+        /* Helper functions to build JSON sourceid, unicastid and broadcastid */
 
         public string prepare_direct_object(Object obj)
         {
@@ -984,7 +985,7 @@ namespace zcd
             return g.to_data(null);
         }
 
-        /* Helper functions to read JSON unicastid and broadcastid */
+        /* Helper functions to read JSON sourceid, unicastid and broadcastid */
 
         internal void read_direct(string js, IJsonReaderElement cb) throws HelperDeserializeError, HelperNotJsonError
         {
@@ -1007,5 +1008,4 @@ namespace zcd
                 return root;
             });
         }
-    }
 }

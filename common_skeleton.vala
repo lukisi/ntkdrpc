@@ -1,6 +1,6 @@
 /*
  *  This file is part of Netsukuku.
- *  (c) Copyright 2015 Luca Dionisi aka lukisi <luca.dionisi@gmail.com>
+ *  (c) Copyright 2015-2016 Luca Dionisi aka lukisi <luca.dionisi@gmail.com>
  *
  *  Netsukuku is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,14 +17,14 @@
  */
 
 using Gee;
+using TaskletSystem;
+using zcd;
 
-namespace zcd
+namespace Netsukuku
 {
-    namespace ModRpc
-    {
-        internal IZcdTasklet tasklet;
+        internal ITasklet tasklet;
 
-        public void init_tasklet_system(zcd.IZcdTasklet _tasklet)
+        public void init_tasklet_system(ITasklet _tasklet)
         {
             zcd.init_tasklet_system(_tasklet);
             tasklet = _tasklet;
@@ -37,17 +37,6 @@ namespace zcd
 
         public abstract class CallerInfo : Object
         {
-        }
-
-        public class TcpCallerInfo : CallerInfo
-        {
-            public TcpCallerInfo(string my_address, string peer_address)
-            {
-                this.my_address = my_address;
-                this.peer_address = peer_address;
-            }
-            public string my_address {get; private set;}
-            public string peer_address {get; private set;}
         }
 
         internal const string s_unicast_service_prefix_response = "RESPONSE:";
@@ -63,9 +52,9 @@ namespace zcd
                 waiting_for_recv = new HashMap<int, WaitingForRecv>();
             }
 
-            private class WaitingForResponse : Object, IZcdTaskletSpawnable
+            private class WaitingForResponse : Object, ITaskletSpawnable
             {
-                public WaitingForResponse(ZcdUdpServiceMessageDelegate parent, int id, Timer timer, IZcdChannel ch)
+                public WaitingForResponse(ZcdUdpServiceMessageDelegate parent, int id, Timer timer, IChannel ch)
                 {
                     this.parent = parent;
                     this.id = id;
@@ -76,7 +65,7 @@ namespace zcd
                 private ZcdUdpServiceMessageDelegate parent;
                 private int id;
                 public Timer timer;
-                private IZcdChannel ch;
+                private IChannel ch;
                 public string response;
                 public bool has_response;
                 public void* func()
@@ -103,9 +92,9 @@ namespace zcd
             }
             private HashMap<int, WaitingForResponse> waiting_for_response;
 
-            private class WaitingForAck : Object, IZcdTaskletSpawnable
+            private class WaitingForAck : Object, ITaskletSpawnable
             {
-                public WaitingForAck(ZcdUdpServiceMessageDelegate parent, int id, int timeout_msec, IZcdChannel ch)
+                public WaitingForAck(ZcdUdpServiceMessageDelegate parent, int id, int timeout_msec, IChannel ch)
                 {
                     this.parent = parent;
                     this.id = id;
@@ -116,7 +105,7 @@ namespace zcd
                 private ZcdUdpServiceMessageDelegate parent;
                 private int id;
                 private int timeout_msec;
-                private IZcdChannel ch;
+                private IChannel ch;
                 public ArrayList<string> macs_list {get; private set;}
                 public void* func()
                 {
@@ -129,7 +118,7 @@ namespace zcd
             }
             private HashMap<int, WaitingForAck> waiting_for_ack;
 
-            private class WaitingForRecv : Object, IZcdTaskletSpawnable
+            private class WaitingForRecv : Object, ITaskletSpawnable
             {
                 public WaitingForRecv(ZcdUdpServiceMessageDelegate parent, int id, int timeout_msec)
                 {
@@ -149,14 +138,14 @@ namespace zcd
             }
             private HashMap<int, WaitingForRecv> waiting_for_recv;
 
-            internal void going_to_send_unicast_with_reply(int id, IZcdChannel ch)
+            internal void going_to_send_unicast_with_reply(int id, IChannel ch)
             {
                 var w = new WaitingForResponse(this, id, new Timer(udp_timeout_msec), ch);
                 tasklet.spawn(w);
                 waiting_for_response[id] = w;
             }
 
-            internal void going_to_send_broadcast_with_ack(int id, IZcdChannel ch)
+            internal void going_to_send_broadcast_with_ack(int id, IChannel ch)
             {
                 var w = new WaitingForAck(this, id, udp_timeout_msec, ch);
                 tasklet.spawn(w);
@@ -297,5 +286,4 @@ namespace zcd
                 return now.is_younger(this);
             }
         }
-    }
 }
