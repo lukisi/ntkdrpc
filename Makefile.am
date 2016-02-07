@@ -39,7 +39,6 @@ libntkdrpc_la_SOURCES = \
 	netsukuku_interfaces.vala \
 	netsukuku_skeleton.vala \
 	netsukuku_stub.vala \
-	addendum.vala \
 	helperrpc.vapi \
 	$(NULL)
 
