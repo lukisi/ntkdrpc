@@ -23,7 +23,6 @@ AddressManager addr
  NeighborhoodManager neighborhood_manager
   void here_i_am(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr)
   void request_arc(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr) throws NeighborhoodRequestArcError
-  uint16 expect_ping(string guid, uint16 peer_port) throws NeighborhoodUnmanagedDeviceError
   void remove_arc(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr)
   void nop()
  QspnManager qspn_manager
@@ -45,7 +44,6 @@ AddressManager addr
   ICoordinatorReservationMessage ask_reservation(int lvl) throws CoordinatorNodeNotReadyError, CoordinatorInvalidLevelError, CoordinatorSaturatedGnodeError
 Errors
  NeighborhoodRequestArcError(NOT_SAME_NETWORK,TOO_MANY_ARCS,TWO_ARCS_ON_COLLISION_DOMAIN,GENERIC)
- NeighborhoodUnmanagedDeviceError(GENERIC)
  QspnNotAcceptedError(GENERIC)
  QspnBootstrapInProgressError(GENERIC)
  PeersUnknownMessageError(GENERIC)
@@ -66,10 +64,6 @@ namespace Netsukuku
         NOT_SAME_NETWORK,
         TOO_MANY_ARCS,
         TWO_ARCS_ON_COLLISION_DOMAIN,
-        GENERIC,
-    }
-
-    public errordomain NeighborhoodUnmanagedDeviceError {
         GENERIC,
     }
 

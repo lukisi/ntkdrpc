@@ -25,7 +25,6 @@ namespace Netsukuku
         {
             public abstract void here_i_am(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr) throws StubError, DeserializeError;
             public abstract void request_arc(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr) throws NeighborhoodRequestArcError, StubError, DeserializeError;
-            public abstract uint16 expect_ping(string guid, uint16 peer_port) throws NeighborhoodUnmanagedDeviceError, StubError, DeserializeError;
             public abstract void remove_arc(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr) throws StubError, DeserializeError;
             public abstract void nop() throws StubError, DeserializeError;
         }
@@ -382,56 +381,6 @@ namespace Netsukuku
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 return;
-            }
-
-            public uint16 expect_ping(string arg0, uint16 arg1) throws NeighborhoodUnmanagedDeviceError, StubError, DeserializeError
-            {
-                string m_name = "addr.neighborhood_manager.expect_ping";
-                ArrayList<string> args = new ArrayList<string>();
-                {
-                    // serialize arg0 (string guid)
-                    args.add(prepare_argument_string(arg0));
-                }
-                {
-                    // serialize arg1 (uint16 peer_port)
-                    args.add(prepare_argument_int64(arg1));
-                }
-
-                string resp;
-                try {
-                    resp = rmt(m_name, args);
-                }
-                catch (ZCDError e) {
-                    throw new StubError.GENERIC(e.message);
-                }
-
-                // deserialize response
-                string? error_domain = null;
-                string? error_code = null;
-                string? error_message = null;
-                string doing = @"Reading return-value of $(m_name)";
-                uint16 ret;
-                int64 val;
-                try {
-                    val = read_return_value_int64_notnull(resp, out error_domain, out error_code, out error_message);
-                } catch (HelperNotJsonError e) {
-                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
-                } catch (HelperDeserializeError e) {
-                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
-                }
-                if (error_domain != null)
-                {
-                    string error_domain_code = @"$(error_domain).$(error_code)";
-                    if (error_domain_code == "NeighborhoodUnmanagedDeviceError.GENERIC")
-                        throw new NeighborhoodUnmanagedDeviceError.GENERIC(error_message);
-                    if (error_domain_code == "DeserializeError.GENERIC")
-                        throw new DeserializeError.GENERIC(error_message);
-                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
-                }
-                if (val > uint16.MAX || val < uint16.MIN)
-                    throw new DeserializeError.GENERIC(@"$(doing): return-value overflows size of uint16");
-                ret = (uint16)val;
-                return ret;
             }
 
             public void remove_arc(INeighborhoodNodeIDMessage arg0, string arg1, string arg2) throws StubError, DeserializeError
