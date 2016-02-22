@@ -373,8 +373,6 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
-                    if (error_domain_code == "NeighborhoodRequestArcError.NOT_SAME_NETWORK")
-                        throw new NeighborhoodRequestArcError.NOT_SAME_NETWORK(error_message);
                     if (error_domain_code == "NeighborhoodRequestArcError.TOO_MANY_ARCS")
                         throw new NeighborhoodRequestArcError.TOO_MANY_ARCS(error_message);
                     if (error_domain_code == "NeighborhoodRequestArcError.TWO_ARCS_ON_COLLISION_DOMAIN")

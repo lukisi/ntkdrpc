@@ -228,7 +228,6 @@ namespace Netsukuku
                             ret = prepare_return_value_null();
                         } catch (NeighborhoodRequestArcError e) {
                             string code = "";
-                            if (e is NeighborhoodRequestArcError.NOT_SAME_NETWORK) code = "NOT_SAME_NETWORK";
                             if (e is NeighborhoodRequestArcError.TOO_MANY_ARCS) code = "TOO_MANY_ARCS";
                             if (e is NeighborhoodRequestArcError.TWO_ARCS_ON_COLLISION_DOMAIN) code = "TWO_ARCS_ON_COLLISION_DOMAIN";
                             if (e is NeighborhoodRequestArcError.GENERIC) code = "GENERIC";

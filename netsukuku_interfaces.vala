@@ -43,7 +43,7 @@ AddressManager addr
   ICoordinatorNeighborMapMessage retrieve_neighbor_map() throws CoordinatorNodeNotReadyError
   ICoordinatorReservationMessage ask_reservation(int lvl) throws CoordinatorNodeNotReadyError, CoordinatorInvalidLevelError, CoordinatorSaturatedGnodeError
 Errors
- NeighborhoodRequestArcError(NOT_SAME_NETWORK,TOO_MANY_ARCS,TWO_ARCS_ON_COLLISION_DOMAIN,GENERIC)
+ NeighborhoodRequestArcError(TOO_MANY_ARCS,TWO_ARCS_ON_COLLISION_DOMAIN,GENERIC)
  QspnNotAcceptedError(GENERIC)
  QspnBootstrapInProgressError(GENERIC)
  PeersUnknownMessageError(GENERIC)
@@ -61,7 +61,6 @@ using zcd;
 namespace Netsukuku
 {
     public errordomain NeighborhoodRequestArcError {
-        NOT_SAME_NETWORK,
         TOO_MANY_ARCS,
         TWO_ARCS_ON_COLLISION_DOMAIN,
         GENERIC,
