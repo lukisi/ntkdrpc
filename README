@@ -1,0 +1,9 @@
+Part of Netsukuku.
+
+This package hides the complexity of Remote Procedure Call from the business
+logic of Netsukuku modules.
+Both identity-agnostic and identity-aware modules can communicate with their
+peer modules in the neighborhood simply calling and implementing methods on
+standard objects.
+The ''ntkd'' daemon depends on it.
+
