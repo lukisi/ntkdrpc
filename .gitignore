@@ -1,4 +1,3 @@
-m4/*
 build_sources/*.vala
 common_helpers.c
 helperrpc.h
