@@ -30,6 +30,11 @@ namespace Netsukuku
             public abstract void nop(CallerInfo? caller=null);
         }
 
+        public interface IIdentityManagerSkeleton : Object
+        {
+            public abstract IDuplicationData? match_duplication(int migration_id, IIdentityID peer_id, IIdentityID old_id, IIdentityID new_id, string old_id_new_mac, string old_id_new_linklocal, CallerInfo? caller=null);
+        }
+
         public interface IQspnManagerSkeleton : Object
         {
             public abstract IQspnEtpMessage get_full_etp(IQspnAddress requesting_address, CallerInfo? caller=null) throws QspnNotAcceptedError, QspnBootstrapInProgressError;
@@ -60,6 +65,8 @@ namespace Netsukuku
         {
             protected abstract unowned INeighborhoodManagerSkeleton neighborhood_manager_getter();
             public INeighborhoodManagerSkeleton neighborhood_manager {get {return neighborhood_manager_getter();}}
+            protected abstract unowned IIdentityManagerSkeleton identity_manager_getter();
+            public IIdentityManagerSkeleton identity_manager {get {return identity_manager_getter();}}
             protected abstract unowned IQspnManagerSkeleton qspn_manager_getter();
             public IQspnManagerSkeleton qspn_manager {get {return qspn_manager_getter();}}
             protected abstract unowned IPeersManagerSkeleton peers_manager_getter();
@@ -310,6 +317,140 @@ namespace Netsukuku
                     else
                     {
                         throw new InSkeletonDeserializeError.GENERIC(@"Unknown method in addr.neighborhood_manager: \"$(m_name)\"");
+                    }
+                }
+                else if (m_name.has_prefix("addr.identity_manager."))
+                {
+                    if (m_name == "addr.identity_manager.match_duplication")
+                    {
+                        if (args.size != 6) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        int arg0;
+                        IIdentityID arg1;
+                        IIdentityID arg2;
+                        IIdentityID arg3;
+                        string arg4;
+                        string arg5;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (int migration_id)
+                            string arg_name = "migration_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                if (val > int.MAX || val < int.MIN)
+                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
+                                arg0 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg1 (IIdentityID peer_id)
+                            string arg_name = "peer_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IIdentityID), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg1 = (IIdentityID)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg2 (IIdentityID old_id)
+                            string arg_name = "old_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IIdentityID), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg2 = (IIdentityID)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg3 (IIdentityID new_id)
+                            string arg_name = "new_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IIdentityID), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg3 = (IIdentityID)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg4 (string old_id_new_mac)
+                            string arg_name = "old_id_new_mac";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                arg4 = read_argument_string_notnull(args[j]);
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg5 (string old_id_new_linklocal)
+                            string arg_name = "old_id_new_linklocal";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                arg5 = read_argument_string_notnull(args[j]);
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        IDuplicationData? result = addr.identity_manager.match_duplication(arg0, arg1, arg2, arg3, arg4, arg5, caller_info);
+                        if (result == null) ret = prepare_return_value_null();
+                        else ret = prepare_return_value_object(result);
+                    }
+                    else
+                    {
+                        throw new InSkeletonDeserializeError.GENERIC(@"Unknown method in addr.identity_manager: \"$(m_name)\"");
                     }
                 }
                 else if (m_name.has_prefix("addr.qspn_manager."))

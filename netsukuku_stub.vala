@@ -29,6 +29,11 @@ namespace Netsukuku
             public abstract void nop() throws StubError, DeserializeError;
         }
 
+        public interface IIdentityManagerStub : Object
+        {
+            public abstract IDuplicationData? match_duplication(int migration_id, IIdentityID peer_id, IIdentityID old_id, IIdentityID new_id, string old_id_new_mac, string old_id_new_linklocal) throws StubError, DeserializeError;
+        }
+
         public interface IQspnManagerStub : Object
         {
             public abstract IQspnEtpMessage get_full_etp(IQspnAddress requesting_address) throws QspnNotAcceptedError, QspnBootstrapInProgressError, StubError, DeserializeError;
@@ -59,6 +64,8 @@ namespace Netsukuku
         {
             protected abstract unowned INeighborhoodManagerStub neighborhood_manager_getter();
             public INeighborhoodManagerStub neighborhood_manager {get {return neighborhood_manager_getter();}}
+            protected abstract unowned IIdentityManagerStub identity_manager_getter();
+            public IIdentityManagerStub identity_manager {get {return identity_manager_getter();}}
             protected abstract unowned IQspnManagerStub qspn_manager_getter();
             public IQspnManagerStub qspn_manager {get {return qspn_manager_getter();}}
             protected abstract unowned IPeersManagerStub peers_manager_getter();
@@ -82,6 +89,7 @@ namespace Netsukuku
             private bool hurry;
             private bool wait_reply;
             private NeighborhoodManagerRemote _neighborhood_manager;
+            private IdentityManagerRemote _identity_manager;
             private QspnManagerRemote _qspn_manager;
             private PeersManagerRemote _peers_manager;
             private CoordinatorManagerRemote _coordinator_manager;
@@ -95,6 +103,7 @@ namespace Netsukuku
                 hurry = false;
                 wait_reply = true;
                 _neighborhood_manager = new NeighborhoodManagerRemote(this.call);
+                _identity_manager = new IdentityManagerRemote(this.call);
                 _qspn_manager = new QspnManagerRemote(this.call);
                 _peers_manager = new PeersManagerRemote(this.call);
                 _coordinator_manager = new CoordinatorManagerRemote(this.call);
@@ -123,6 +132,11 @@ namespace Netsukuku
             protected unowned INeighborhoodManagerStub neighborhood_manager_getter()
             {
                 return _neighborhood_manager;
+            }
+
+            protected unowned IIdentityManagerStub identity_manager_getter()
+            {
+                return _identity_manager;
             }
 
             protected unowned IQspnManagerStub qspn_manager_getter()
@@ -170,6 +184,7 @@ namespace Netsukuku
             private string src_ip;
             private bool wait_reply;
             private NeighborhoodManagerRemote _neighborhood_manager;
+            private IdentityManagerRemote _identity_manager;
             private QspnManagerRemote _qspn_manager;
             private PeersManagerRemote _peers_manager;
             private CoordinatorManagerRemote _coordinator_manager;
@@ -182,6 +197,7 @@ namespace Netsukuku
                 this.src_ip = src_ip;
                 this.wait_reply = wait_reply;
                 _neighborhood_manager = new NeighborhoodManagerRemote(this.call);
+                _identity_manager = new IdentityManagerRemote(this.call);
                 _qspn_manager = new QspnManagerRemote(this.call);
                 _peers_manager = new PeersManagerRemote(this.call);
                 _coordinator_manager = new CoordinatorManagerRemote(this.call);
@@ -190,6 +206,11 @@ namespace Netsukuku
             protected unowned INeighborhoodManagerStub neighborhood_manager_getter()
             {
                 return _neighborhood_manager;
+            }
+
+            protected unowned IIdentityManagerStub identity_manager_getter()
+            {
+                return _identity_manager;
             }
 
             protected unowned IQspnManagerStub qspn_manager_getter()
@@ -228,6 +249,7 @@ namespace Netsukuku
             private uint16 port;
             private IAckCommunicator? notify_ack;
             private NeighborhoodManagerRemote _neighborhood_manager;
+            private IdentityManagerRemote _identity_manager;
             private QspnManagerRemote _qspn_manager;
             private PeersManagerRemote _peers_manager;
             private CoordinatorManagerRemote _coordinator_manager;
@@ -243,6 +265,7 @@ namespace Netsukuku
                 this.port = port;
                 this.notify_ack = notify_ack;
                 _neighborhood_manager = new NeighborhoodManagerRemote(this.call);
+                _identity_manager = new IdentityManagerRemote(this.call);
                 _qspn_manager = new QspnManagerRemote(this.call);
                 _peers_manager = new PeersManagerRemote(this.call);
                 _coordinator_manager = new CoordinatorManagerRemote(this.call);
@@ -251,6 +274,11 @@ namespace Netsukuku
             protected unowned INeighborhoodManagerStub neighborhood_manager_getter()
             {
                 return _neighborhood_manager;
+            }
+
+            protected unowned IIdentityManagerStub identity_manager_getter()
+            {
+                return _identity_manager;
             }
 
             protected unowned IQspnManagerStub qspn_manager_getter()
@@ -470,6 +498,80 @@ namespace Netsukuku
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
                 return;
+            }
+
+        }
+
+        internal class IdentityManagerRemote : Object, IIdentityManagerStub
+        {
+            private unowned FakeRmt rmt;
+            public IdentityManagerRemote(FakeRmt rmt)
+            {
+                this.rmt = rmt;
+            }
+
+            public IDuplicationData? match_duplication(int arg0, IIdentityID arg1, IIdentityID arg2, IIdentityID arg3, string arg4, string arg5) throws StubError, DeserializeError
+            {
+                string m_name = "addr.identity_manager.match_duplication";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (int migration_id)
+                    args.add(prepare_argument_int64(arg0));
+                }
+                {
+                    // serialize arg1 (IIdentityID peer_id)
+                    args.add(prepare_argument_object(arg1));
+                }
+                {
+                    // serialize arg2 (IIdentityID old_id)
+                    args.add(prepare_argument_object(arg2));
+                }
+                {
+                    // serialize arg3 (IIdentityID new_id)
+                    args.add(prepare_argument_object(arg3));
+                }
+                {
+                    // serialize arg4 (string old_id_new_mac)
+                    args.add(prepare_argument_string(arg4));
+                }
+                {
+                    // serialize arg5 (string old_id_new_linklocal)
+                    args.add(prepare_argument_string(arg5));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                Object? ret;
+                try {
+                    ret = read_return_value_object_maybe(typeof(IDuplicationData), resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                if (ret == null) return null;
+                if (ret is ISerializable)
+                    if (!((ISerializable)ret).check_deserialization())
+                        throw new DeserializeError.GENERIC(@"$(doing): instance of $(ret.get_type().name()) has not been fully deserialized");
+                return (IDuplicationData)ret;
             }
 
         }
