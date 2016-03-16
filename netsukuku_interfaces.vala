@@ -27,6 +27,7 @@ AddressManager addr
   void nop()
  IdentityManager identity_manager
   IDuplicationData? match_duplication(int migration_id, IIdentityID peer_id, IIdentityID old_id, IIdentityID new_id, string old_id_new_mac, string old_id_new_linklocal)
+  IIdentityID get_peer_main_id()
  QspnManager qspn_manager
   IQspnEtpMessage get_full_etp(IQspnAddress requesting_address) throws QspnNotAcceptedError, QspnBootstrapInProgressError
   void send_etp(IQspnEtpMessage etp, bool is_full) throws QspnNotAcceptedError

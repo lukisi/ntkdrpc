@@ -33,6 +33,7 @@ namespace Netsukuku
         public interface IIdentityManagerSkeleton : Object
         {
             public abstract IDuplicationData? match_duplication(int migration_id, IIdentityID peer_id, IIdentityID old_id, IIdentityID new_id, string old_id_new_mac, string old_id_new_linklocal, CallerInfo? caller=null);
+            public abstract IIdentityID get_peer_main_id(CallerInfo? caller=null);
         }
 
         public interface IQspnManagerSkeleton : Object
@@ -447,6 +448,14 @@ namespace Netsukuku
                         IDuplicationData? result = addr.identity_manager.match_duplication(arg0, arg1, arg2, arg3, arg4, arg5, caller_info);
                         if (result == null) ret = prepare_return_value_null();
                         else ret = prepare_return_value_object(result);
+                    }
+                    else if (m_name == "addr.identity_manager.get_peer_main_id")
+                    {
+                        if (args.size != 0) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+
+                        IIdentityID result = addr.identity_manager.get_peer_main_id(caller_info);
+                        ret = prepare_return_value_object(result);
                     }
                     else
                     {
