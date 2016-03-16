@@ -33,6 +33,7 @@ namespace Netsukuku
         {
             public abstract IDuplicationData? match_duplication(int migration_id, IIdentityID peer_id, IIdentityID old_id, IIdentityID new_id, string old_id_new_mac, string old_id_new_linklocal) throws StubError, DeserializeError;
             public abstract IIdentityID get_peer_main_id() throws StubError, DeserializeError;
+            public abstract void notify_identity_removed(IIdentityID id) throws StubError, DeserializeError;
         }
 
         public interface IQspnManagerStub : Object
@@ -612,6 +613,47 @@ namespace Netsukuku
                     if (!((ISerializable)ret).check_deserialization())
                         throw new DeserializeError.GENERIC(@"$(doing): instance of $(ret.get_type().name()) has not been fully deserialized");
                 return (IIdentityID)ret;
+            }
+
+            public void notify_identity_removed(IIdentityID arg0) throws StubError, DeserializeError
+            {
+                string m_name = "addr.identity_manager.notify_identity_removed";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (IIdentityID id)
+                    args.add(prepare_argument_object(arg0));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                try {
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return;
             }
 
         }
