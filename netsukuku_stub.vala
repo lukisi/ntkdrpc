@@ -40,6 +40,8 @@ namespace Netsukuku
         {
             public abstract IQspnEtpMessage get_full_etp(IQspnAddress requesting_address) throws QspnNotAcceptedError, QspnBootstrapInProgressError, StubError, DeserializeError;
             public abstract void send_etp(IQspnEtpMessage etp, bool is_full) throws QspnNotAcceptedError, StubError, DeserializeError;
+            public abstract void got_prepare_destroy() throws StubError, DeserializeError;
+            public abstract void got_destroy() throws StubError, DeserializeError;
         }
 
         public interface IPeersManagerStub : Object
@@ -753,6 +755,80 @@ namespace Netsukuku
                     string error_domain_code = @"$(error_domain).$(error_code)";
                     if (error_domain_code == "QspnNotAcceptedError.GENERIC")
                         throw new QspnNotAcceptedError.GENERIC(error_message);
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return;
+            }
+
+            public void got_prepare_destroy() throws StubError, DeserializeError
+            {
+                string m_name = "addr.qspn_manager.got_prepare_destroy";
+                ArrayList<string> args = new ArrayList<string>();
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                try {
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return;
+            }
+
+            public void got_destroy() throws StubError, DeserializeError
+            {
+                string m_name = "addr.qspn_manager.got_destroy";
+                ArrayList<string> args = new ArrayList<string>();
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                try {
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
                     if (error_domain_code == "DeserializeError.GENERIC")
                         throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");

@@ -11,6 +11,8 @@ AddressManager addr
  QspnManager qspn_manager
   IQspnEtpMessage get_full_etp(IQspnAddress requesting_address) throws QspnNotAcceptedError, QspnBootstrapInProgressError
   void send_etp(IQspnEtpMessage etp, bool is_full) throws QspnNotAcceptedError
+  void got_prepare_destroy()
+  void got_destroy()
  PeersManager peers_manager
   IPeerParticipantSet get_participant_set(int lvl) throws PeersInvalidRequest
   void forward_peer_message(IPeerMessage peer_message)

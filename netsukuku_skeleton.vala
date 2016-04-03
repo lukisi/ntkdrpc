@@ -41,6 +41,8 @@ namespace Netsukuku
         {
             public abstract IQspnEtpMessage get_full_etp(IQspnAddress requesting_address, CallerInfo? caller=null) throws QspnNotAcceptedError, QspnBootstrapInProgressError;
             public abstract void send_etp(IQspnEtpMessage etp, bool is_full, CallerInfo? caller=null) throws QspnNotAcceptedError;
+            public abstract void got_prepare_destroy(CallerInfo? caller=null);
+            public abstract void got_destroy(CallerInfo? caller=null);
         }
 
         public interface IPeersManagerSkeleton : Object
@@ -595,6 +597,22 @@ namespace Netsukuku
                             assert(code != "");
                             ret = prepare_error("QspnNotAcceptedError", code, e.message);
                         }
+                    }
+                    else if (m_name == "addr.qspn_manager.got_prepare_destroy")
+                    {
+                        if (args.size != 0) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+
+                        addr.qspn_manager.got_prepare_destroy(caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.qspn_manager.got_destroy")
+                    {
+                        if (args.size != 0) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+
+                        addr.qspn_manager.got_destroy(caller_info);
+                        ret = prepare_return_value_null();
                     }
                     else
                     {
