@@ -12,6 +12,8 @@ ntkdrpc.h
 ntkdrpc.vapi
 Makefile.in
 Makefile
+ntkdrpc.pc
+*.o
 *.lo
 *.la
 .deps
