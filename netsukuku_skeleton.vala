@@ -34,7 +34,7 @@ namespace Netsukuku
         {
             public abstract IDuplicationData? match_duplication(int migration_id, IIdentityID peer_id, IIdentityID old_id, IIdentityID new_id, string old_id_new_mac, string old_id_new_linklocal, CallerInfo? caller=null);
             public abstract IIdentityID get_peer_main_id(CallerInfo? caller=null);
-            public abstract void notify_identity_removed(IIdentityID id, CallerInfo? caller=null);
+            public abstract void notify_identity_arc_removed(IIdentityID peer_id, IIdentityID my_id, CallerInfo? caller=null);
         }
 
         public interface IQspnManagerSkeleton : Object
@@ -460,17 +460,18 @@ namespace Netsukuku
                         IIdentityID result = addr.identity_manager.get_peer_main_id(caller_info);
                         ret = prepare_return_value_object(result);
                     }
-                    else if (m_name == "addr.identity_manager.notify_identity_removed")
+                    else if (m_name == "addr.identity_manager.notify_identity_arc_removed")
                     {
-                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+                        if (args.size != 2) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
 
                         // arguments:
                         IIdentityID arg0;
+                        IIdentityID arg1;
                         // position:
                         int j = 0;
                         {
-                            // deserialize arg0 (IIdentityID id)
-                            string arg_name = "id";
+                            // deserialize arg0 (IIdentityID peer_id)
+                            string arg_name = "peer_id";
                             string doing = @"Reading argument '$(arg_name)' for $(m_name)";
                             try {
                                 Object val;
@@ -488,8 +489,28 @@ namespace Netsukuku
                             }
                             j++;
                         }
+                        {
+                            // deserialize arg1 (IIdentityID my_id)
+                            string arg_name = "my_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IIdentityID), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg1 = (IIdentityID)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
 
-                        addr.identity_manager.notify_identity_removed(arg0, caller_info);
+                        addr.identity_manager.notify_identity_arc_removed(arg0, arg1, caller_info);
                         ret = prepare_return_value_null();
                     }
                     else

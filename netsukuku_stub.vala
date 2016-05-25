@@ -33,7 +33,7 @@ namespace Netsukuku
         {
             public abstract IDuplicationData? match_duplication(int migration_id, IIdentityID peer_id, IIdentityID old_id, IIdentityID new_id, string old_id_new_mac, string old_id_new_linklocal) throws StubError, DeserializeError;
             public abstract IIdentityID get_peer_main_id() throws StubError, DeserializeError;
-            public abstract void notify_identity_removed(IIdentityID id) throws StubError, DeserializeError;
+            public abstract void notify_identity_arc_removed(IIdentityID peer_id, IIdentityID my_id) throws StubError, DeserializeError;
         }
 
         public interface IQspnManagerStub : Object
@@ -617,13 +617,17 @@ namespace Netsukuku
                 return (IIdentityID)ret;
             }
 
-            public void notify_identity_removed(IIdentityID arg0) throws StubError, DeserializeError
+            public void notify_identity_arc_removed(IIdentityID arg0, IIdentityID arg1) throws StubError, DeserializeError
             {
-                string m_name = "addr.identity_manager.notify_identity_removed";
+                string m_name = "addr.identity_manager.notify_identity_arc_removed";
                 ArrayList<string> args = new ArrayList<string>();
                 {
-                    // serialize arg0 (IIdentityID id)
+                    // serialize arg0 (IIdentityID peer_id)
                     args.add(prepare_argument_object(arg0));
+                }
+                {
+                    // serialize arg1 (IIdentityID my_id)
+                    args.add(prepare_argument_object(arg1));
                 }
 
                 string resp;
