@@ -1,3 +1,4 @@
+*~
 build_sources/*.vala
 common_helpers.c
 helperrpc.h
@@ -38,3 +39,5 @@ ltmain.sh
 missing
 compile
 .valencia
+.buildconfig
+
