@@ -16,6 +16,8 @@ libhelperrpc_la_SOURCES = \
 libhelperrpc_la_VALAFLAGS = \
 	-H helperrpc.h \
 	--library helperrpc \
+	--vapidir $(GEE_PREFIX)/share/vala/vapi \
+	--vapidir $(JSON_PREFIX)/share/vala-0.32/vapi \
 	--pkg gee-0.8 \
 	--pkg json-glib-1.0 \
 	$(NULL)
@@ -45,6 +47,10 @@ libntkdrpc_la_SOURCES = \
 libntkdrpc_la_VALAFLAGS = \
 	-H ntkdrpc.h \
 	--library ntkdrpc \
+	--vapidir $(GEE_PREFIX)/share/vala/vapi \
+	--vapidir $(JSON_PREFIX)/share/vala-0.32/vapi \
+	--vapidir $(TASKLETSYSTEM_VAPIDIR) \
+	--vapidir $(ZCD_VAPIDIR) \
 	--pkg gee-0.8 \
 	--pkg json-glib-1.0 \
 	--pkg tasklet-system \
