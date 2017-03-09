@@ -7,3 +7,5 @@ peer modules in the neighborhood simply calling and implementing methods on
 standard objects.
 The ''ntkd'' daemon depends on it.
 
+
+See documentation at https://github.com/lukisi/documentation
