@@ -57,6 +57,8 @@ namespace Netsukuku
             public abstract void set_failure(int msg_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
             public abstract void set_non_participant(int msg_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
             public abstract void set_participant(int p_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
+            public abstract void give_participant_maps(IPeerParticipantSet maps, CallerInfo? caller=null);
+            public abstract IPeerParticipantSet ask_participant_maps(CallerInfo? caller=null);
         }
 
         public interface ICoordinatorManagerSkeleton : Object
@@ -1176,6 +1178,46 @@ namespace Netsukuku
 
                         addr.peers_manager.set_participant(arg0, arg1, caller_info);
                         ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.peers_manager.give_participant_maps")
+                    {
+                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        IPeerParticipantSet arg0;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (IPeerParticipantSet maps)
+                            string arg_name = "maps";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IPeerParticipantSet), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg0 = (IPeerParticipantSet)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.peers_manager.give_participant_maps(arg0, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.peers_manager.ask_participant_maps")
+                    {
+                        if (args.size != 0) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+
+                        IPeerParticipantSet result = addr.peers_manager.ask_participant_maps(caller_info);
+                        ret = prepare_return_value_object(result);
                     }
                     else
                     {
