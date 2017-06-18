@@ -55,6 +55,7 @@ namespace Netsukuku
             public abstract void set_next_destination(int msg_id, IPeerTupleGNode tuple) throws StubError, DeserializeError;
             public abstract void set_failure(int msg_id, IPeerTupleGNode tuple) throws StubError, DeserializeError;
             public abstract void set_non_participant(int msg_id, IPeerTupleGNode tuple) throws StubError, DeserializeError;
+            public abstract void set_missing_optional_maps(int msg_id) throws StubError, DeserializeError;
             public abstract void set_participant(int p_id, IPeerTupleGNode tuple) throws StubError, DeserializeError;
             public abstract void give_participant_maps(IPeerParticipantSet maps) throws StubError, DeserializeError;
             public abstract IPeerParticipantSet ask_participant_maps() throws StubError, DeserializeError;
@@ -1233,6 +1234,47 @@ namespace Netsukuku
                 {
                     // serialize arg1 (IPeerTupleGNode tuple)
                     args.add(prepare_argument_object(arg1));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                try {
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return;
+            }
+
+            public void set_missing_optional_maps(int arg0) throws StubError, DeserializeError
+            {
+                string m_name = "addr.peers_manager.set_missing_optional_maps";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (int msg_id)
+                    args.add(prepare_argument_int64(arg0));
                 }
 
                 string resp;

@@ -56,6 +56,7 @@ namespace Netsukuku
             public abstract void set_next_destination(int msg_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
             public abstract void set_failure(int msg_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
             public abstract void set_non_participant(int msg_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
+            public abstract void set_missing_optional_maps(int msg_id, CallerInfo? caller=null);
             public abstract void set_participant(int p_id, IPeerTupleGNode tuple, CallerInfo? caller=null);
             public abstract void give_participant_maps(IPeerParticipantSet maps, CallerInfo? caller=null);
             public abstract IPeerParticipantSet ask_participant_maps(CallerInfo? caller=null);
@@ -1125,6 +1126,37 @@ namespace Netsukuku
                         }
 
                         addr.peers_manager.set_non_participant(arg0, arg1, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.peers_manager.set_missing_optional_maps")
+                    {
+                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        int arg0;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (int msg_id)
+                            string arg_name = "msg_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                if (val > int.MAX || val < int.MIN)
+                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
+                                arg0 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.peers_manager.set_missing_optional_maps(arg0, caller_info);
                         ret = prepare_return_value_null();
                     }
                     else if (m_name == "addr.peers_manager.set_participant")

@@ -44,6 +44,7 @@ AddressManager addr
   void set_next_destination(int msg_id, IPeerTupleGNode tuple)
   void set_failure(int msg_id, IPeerTupleGNode tuple)
   void set_non_participant(int msg_id, IPeerTupleGNode tuple)
+  void set_missing_optional_maps(int msg_id)
   void set_participant(int p_id, IPeerTupleGNode tuple)
   void give_participant_maps(IPeerParticipantSet maps)
   IPeerParticipantSet ask_participant_maps()
