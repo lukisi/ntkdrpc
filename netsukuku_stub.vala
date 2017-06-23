@@ -46,7 +46,6 @@ namespace Netsukuku
 
         public interface IPeersManagerStub : Object
         {
-            public abstract IPeerParticipantSet get_participant_set(int lvl) throws PeersInvalidRequest, StubError, DeserializeError;
             public abstract void forward_peer_message(IPeerMessage peer_message) throws StubError, DeserializeError;
             public abstract IPeersRequest get_request(int msg_id, IPeerTupleNode respondant) throws PeersUnknownMessageError, PeersInvalidRequest, StubError, DeserializeError;
             public abstract void set_response(int msg_id, IPeersResponse response, IPeerTupleNode respondant) throws StubError, DeserializeError;
@@ -851,51 +850,6 @@ namespace Netsukuku
             public PeersManagerRemote(FakeRmt rmt)
             {
                 this.rmt = rmt;
-            }
-
-            public IPeerParticipantSet get_participant_set(int arg0) throws PeersInvalidRequest, StubError, DeserializeError
-            {
-                string m_name = "addr.peers_manager.get_participant_set";
-                ArrayList<string> args = new ArrayList<string>();
-                {
-                    // serialize arg0 (int lvl)
-                    args.add(prepare_argument_int64(arg0));
-                }
-
-                string resp;
-                try {
-                    resp = rmt(m_name, args);
-                }
-                catch (ZCDError e) {
-                    throw new StubError.GENERIC(e.message);
-                }
-
-                // deserialize response
-                string? error_domain = null;
-                string? error_code = null;
-                string? error_message = null;
-                string doing = @"Reading return-value of $(m_name)";
-                Object ret;
-                try {
-                    ret = read_return_value_object_notnull(typeof(IPeerParticipantSet), resp, out error_domain, out error_code, out error_message);
-                } catch (HelperNotJsonError e) {
-                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
-                } catch (HelperDeserializeError e) {
-                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
-                }
-                if (error_domain != null)
-                {
-                    string error_domain_code = @"$(error_domain).$(error_code)";
-                    if (error_domain_code == "PeersInvalidRequest.GENERIC")
-                        throw new PeersInvalidRequest.GENERIC(error_message);
-                    if (error_domain_code == "DeserializeError.GENERIC")
-                        throw new DeserializeError.GENERIC(error_message);
-                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
-                }
-                if (ret is ISerializable)
-                    if (!((ISerializable)ret).check_deserialization())
-                        throw new DeserializeError.GENERIC(@"$(doing): instance of $(ret.get_type().name()) has not been fully deserialized");
-                return (IPeerParticipantSet)ret;
             }
 
             public void forward_peer_message(IPeerMessage arg0) throws StubError, DeserializeError

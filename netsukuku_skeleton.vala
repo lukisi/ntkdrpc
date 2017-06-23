@@ -47,7 +47,6 @@ namespace Netsukuku
 
         public interface IPeersManagerSkeleton : Object
         {
-            public abstract IPeerParticipantSet get_participant_set(int lvl, CallerInfo? caller=null) throws PeersInvalidRequest;
             public abstract void forward_peer_message(IPeerMessage peer_message, CallerInfo? caller=null);
             public abstract IPeersRequest get_request(int msg_id, IPeerTupleNode respondant, CallerInfo? caller=null) throws PeersUnknownMessageError, PeersInvalidRequest;
             public abstract void set_response(int msg_id, IPeersResponse response, IPeerTupleNode respondant, CallerInfo? caller=null);
@@ -645,45 +644,7 @@ namespace Netsukuku
                 }
                 else if (m_name.has_prefix("addr.peers_manager."))
                 {
-                    if (m_name == "addr.peers_manager.get_participant_set")
-                    {
-                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
-
-                        // arguments:
-                        int arg0;
-                        // position:
-                        int j = 0;
-                        {
-                            // deserialize arg0 (int lvl)
-                            string arg_name = "lvl";
-                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
-                            try {
-                                int64 val;
-                                val = read_argument_int64_notnull(args[j]);
-                                if (val > int.MAX || val < int.MIN)
-                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
-                                arg0 = (int)val;
-                            } catch (HelperNotJsonError e) {
-                                critical(@"Error parsing JSON for argument: $(e.message)");
-                                critical(@" method-name: $(m_name)");
-                                error(@" argument #$(j): $(args[j])");
-                            } catch (HelperDeserializeError e) {
-                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
-                            }
-                            j++;
-                        }
-
-                        try {
-                            IPeerParticipantSet result = addr.peers_manager.get_participant_set(arg0, caller_info);
-                            ret = prepare_return_value_object(result);
-                        } catch (PeersInvalidRequest e) {
-                            string code = "";
-                            if (e is PeersInvalidRequest.GENERIC) code = "GENERIC";
-                            assert(code != "");
-                            ret = prepare_error("PeersInvalidRequest", code, e.message);
-                        }
-                    }
-                    else if (m_name == "addr.peers_manager.forward_peer_message")
+                    if (m_name == "addr.peers_manager.forward_peer_message")
                     {
                         if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
 

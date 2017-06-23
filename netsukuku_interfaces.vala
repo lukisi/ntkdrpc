@@ -35,7 +35,6 @@ AddressManager addr
   void got_prepare_destroy()
   void got_destroy()
  PeersManager peers_manager
-  IPeerParticipantSet get_participant_set(int lvl) throws PeersInvalidRequest
   void forward_peer_message(IPeerMessage peer_message)
   IPeersRequest get_request(int msg_id, IPeerTupleNode respondant) throws PeersUnknownMessageError, PeersInvalidRequest
   void set_response(int msg_id, IPeersResponse response, IPeerTupleNode respondant)
@@ -123,10 +122,6 @@ namespace Netsukuku
     {
     }
 
-    public interface IPeerParticipantSet : Object
-    {
-    }
-
     public interface IPeerMessage : Object
     {
     }
@@ -144,6 +139,10 @@ namespace Netsukuku
     }
 
     public interface IPeerTupleGNode : Object
+    {
+    }
+
+    public interface IPeerParticipantSet : Object
     {
     }
 
