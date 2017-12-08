@@ -17,7 +17,7 @@ AddressManager addr
   void forward_peer_message(IPeerMessage peer_message)
   IPeersRequest get_request(int msg_id, IPeerTupleNode respondant) throws PeersUnknownMessageError, PeersInvalidRequest
   void set_response(int msg_id, IPeersResponse response, IPeerTupleNode respondant)
-  void set_refuse_message(int msg_id, string refuse_message, IPeerTupleNode respondant)
+  void set_refuse_message(int msg_id, string refuse_message, int e_lvl, IPeerTupleNode respondant)
   void set_redo_from_start(int msg_id, IPeerTupleNode respondant)
   void set_next_destination(int msg_id, IPeerTupleGNode tuple)
   void set_failure(int msg_id, IPeerTupleGNode tuple)
