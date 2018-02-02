@@ -62,8 +62,9 @@ namespace Netsukuku
 
         public interface ICoordinatorManagerStub : Object
         {
-            public abstract ICoordinatorNeighborMapMessage retrieve_neighbor_map() throws CoordinatorNodeNotReadyError, StubError, DeserializeError;
-            public abstract ICoordinatorReservationMessage ask_reservation(int lvl) throws CoordinatorNodeNotReadyError, CoordinatorInvalidLevelError, CoordinatorSaturatedGnodeError, StubError, DeserializeError;
+            public abstract void execute_prepare_migration(ICoordTupleGNode tuple, int fp_id, int propagation_id, int lvl, ICoordObject prepare_migration_data) throws StubError, DeserializeError;
+            public abstract void execute_finish_migration(ICoordTupleGNode tuple, int fp_id, int propagation_id, int lvl, ICoordObject finish_migration_data) throws StubError, DeserializeError;
+            public abstract void execute_we_have_splitted(ICoordTupleGNode tuple, int fp_id, int propagation_id, int lvl, ICoordObject we_have_splitted_data) throws StubError, DeserializeError;
         }
 
         public interface IAddressManagerStub : Object
@@ -1402,10 +1403,30 @@ namespace Netsukuku
                 this.rmt = rmt;
             }
 
-            public ICoordinatorNeighborMapMessage retrieve_neighbor_map() throws CoordinatorNodeNotReadyError, StubError, DeserializeError
+            public void execute_prepare_migration(ICoordTupleGNode arg0, int arg1, int arg2, int arg3, ICoordObject arg4) throws StubError, DeserializeError
             {
-                string m_name = "addr.coordinator_manager.retrieve_neighbor_map";
+                string m_name = "addr.coordinator_manager.execute_prepare_migration";
                 ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (ICoordTupleGNode tuple)
+                    args.add(prepare_argument_object(arg0));
+                }
+                {
+                    // serialize arg1 (int fp_id)
+                    args.add(prepare_argument_int64(arg1));
+                }
+                {
+                    // serialize arg2 (int propagation_id)
+                    args.add(prepare_argument_int64(arg2));
+                }
+                {
+                    // serialize arg3 (int lvl)
+                    args.add(prepare_argument_int64(arg3));
+                }
+                {
+                    // serialize arg4 (ICoordObject prepare_migration_data)
+                    args.add(prepare_argument_object(arg4));
+                }
 
                 string resp;
                 try {
@@ -1414,15 +1435,16 @@ namespace Netsukuku
                 catch (ZCDError e) {
                     throw new StubError.GENERIC(e.message);
                 }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
 
                 // deserialize response
                 string? error_domain = null;
                 string? error_code = null;
                 string? error_message = null;
                 string doing = @"Reading return-value of $(m_name)";
-                Object ret;
                 try {
-                    ret = read_return_value_object_notnull(typeof(ICoordinatorNeighborMapMessage), resp, out error_domain, out error_code, out error_message);
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
                 } catch (HelperNotJsonError e) {
                     error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
                 } catch (HelperDeserializeError e) {
@@ -1431,25 +1453,36 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
-                    if (error_domain_code == "CoordinatorNodeNotReadyError.GENERIC")
-                        throw new CoordinatorNodeNotReadyError.GENERIC(error_message);
                     if (error_domain_code == "DeserializeError.GENERIC")
                         throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
-                if (ret is ISerializable)
-                    if (!((ISerializable)ret).check_deserialization())
-                        throw new DeserializeError.GENERIC(@"$(doing): instance of $(ret.get_type().name()) has not been fully deserialized");
-                return (ICoordinatorNeighborMapMessage)ret;
+                return;
             }
 
-            public ICoordinatorReservationMessage ask_reservation(int arg0) throws CoordinatorNodeNotReadyError, CoordinatorInvalidLevelError, CoordinatorSaturatedGnodeError, StubError, DeserializeError
+            public void execute_finish_migration(ICoordTupleGNode arg0, int arg1, int arg2, int arg3, ICoordObject arg4) throws StubError, DeserializeError
             {
-                string m_name = "addr.coordinator_manager.ask_reservation";
+                string m_name = "addr.coordinator_manager.execute_finish_migration";
                 ArrayList<string> args = new ArrayList<string>();
                 {
-                    // serialize arg0 (int lvl)
-                    args.add(prepare_argument_int64(arg0));
+                    // serialize arg0 (ICoordTupleGNode tuple)
+                    args.add(prepare_argument_object(arg0));
+                }
+                {
+                    // serialize arg1 (int fp_id)
+                    args.add(prepare_argument_int64(arg1));
+                }
+                {
+                    // serialize arg2 (int propagation_id)
+                    args.add(prepare_argument_int64(arg2));
+                }
+                {
+                    // serialize arg3 (int lvl)
+                    args.add(prepare_argument_int64(arg3));
+                }
+                {
+                    // serialize arg4 (ICoordObject finish_migration_data)
+                    args.add(prepare_argument_object(arg4));
                 }
 
                 string resp;
@@ -1459,15 +1492,16 @@ namespace Netsukuku
                 catch (ZCDError e) {
                     throw new StubError.GENERIC(e.message);
                 }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
 
                 // deserialize response
                 string? error_domain = null;
                 string? error_code = null;
                 string? error_message = null;
                 string doing = @"Reading return-value of $(m_name)";
-                Object ret;
                 try {
-                    ret = read_return_value_object_notnull(typeof(ICoordinatorReservationMessage), resp, out error_domain, out error_code, out error_message);
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
                 } catch (HelperNotJsonError e) {
                     error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
                 } catch (HelperDeserializeError e) {
@@ -1476,20 +1510,68 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
-                    if (error_domain_code == "CoordinatorNodeNotReadyError.GENERIC")
-                        throw new CoordinatorNodeNotReadyError.GENERIC(error_message);
-                    if (error_domain_code == "CoordinatorInvalidLevelError.GENERIC")
-                        throw new CoordinatorInvalidLevelError.GENERIC(error_message);
-                    if (error_domain_code == "CoordinatorSaturatedGnodeError.GENERIC")
-                        throw new CoordinatorSaturatedGnodeError.GENERIC(error_message);
                     if (error_domain_code == "DeserializeError.GENERIC")
                         throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
                 }
-                if (ret is ISerializable)
-                    if (!((ISerializable)ret).check_deserialization())
-                        throw new DeserializeError.GENERIC(@"$(doing): instance of $(ret.get_type().name()) has not been fully deserialized");
-                return (ICoordinatorReservationMessage)ret;
+                return;
+            }
+
+            public void execute_we_have_splitted(ICoordTupleGNode arg0, int arg1, int arg2, int arg3, ICoordObject arg4) throws StubError, DeserializeError
+            {
+                string m_name = "addr.coordinator_manager.execute_we_have_splitted";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (ICoordTupleGNode tuple)
+                    args.add(prepare_argument_object(arg0));
+                }
+                {
+                    // serialize arg1 (int fp_id)
+                    args.add(prepare_argument_int64(arg1));
+                }
+                {
+                    // serialize arg2 (int propagation_id)
+                    args.add(prepare_argument_int64(arg2));
+                }
+                {
+                    // serialize arg3 (int lvl)
+                    args.add(prepare_argument_int64(arg3));
+                }
+                {
+                    // serialize arg4 (ICoordObject we_have_splitted_data)
+                    args.add(prepare_argument_object(arg4));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                try {
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return;
             }
 
         }

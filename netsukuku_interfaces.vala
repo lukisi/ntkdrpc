@@ -48,17 +48,15 @@ AddressManager addr
   void give_participant_maps(IPeerParticipantSet maps)
   IPeerParticipantSet ask_participant_maps()
  CoordinatorManager coordinator_manager
-  ICoordinatorNeighborMapMessage retrieve_neighbor_map() throws CoordinatorNodeNotReadyError
-  ICoordinatorReservationMessage ask_reservation(int lvl) throws CoordinatorNodeNotReadyError, CoordinatorInvalidLevelError, CoordinatorSaturatedGnodeError
+  void execute_prepare_migration(ICoordTupleGNode tuple, int fp_id, int propagation_id, int lvl, ICoordObject prepare_migration_data)
+  void execute_finish_migration(ICoordTupleGNode tuple, int fp_id, int propagation_id, int lvl, ICoordObject finish_migration_data)
+  void execute_we_have_splitted(ICoordTupleGNode tuple, int fp_id, int propagation_id, int lvl, ICoordObject we_have_splitted_data)
 Errors
  NeighborhoodRequestArcError(TOO_MANY_ARCS,TWO_ARCS_ON_COLLISION_DOMAIN,GENERIC)
  QspnNotAcceptedError(GENERIC)
  QspnBootstrapInProgressError(GENERIC)
  PeersUnknownMessageError(GENERIC)
  PeersInvalidRequest(GENERIC)
- CoordinatorNodeNotReadyError(GENERIC)
- CoordinatorInvalidLevelError(GENERIC)
- CoordinatorSaturatedGnodeError(GENERIC)
 
 ==========================================
  */
@@ -87,18 +85,6 @@ namespace Netsukuku
     }
 
     public errordomain PeersInvalidRequest {
-        GENERIC,
-    }
-
-    public errordomain CoordinatorNodeNotReadyError {
-        GENERIC,
-    }
-
-    public errordomain CoordinatorInvalidLevelError {
-        GENERIC,
-    }
-
-    public errordomain CoordinatorSaturatedGnodeError {
         GENERIC,
     }
 
@@ -146,11 +132,11 @@ namespace Netsukuku
     {
     }
 
-    public interface ICoordinatorNeighborMapMessage : Object
+    public interface ICoordTupleGNode : Object
     {
     }
 
-    public interface ICoordinatorReservationMessage : Object
+    public interface ICoordObject : Object
     {
     }
 
