@@ -48,9 +48,9 @@ AddressManager addr
   void give_participant_maps(IPeerParticipantSet maps)
   IPeerParticipantSet ask_participant_maps()
  CoordinatorManager coordinator_manager
-  void execute_prepare_migration(ICoordTupleGNode tuple, int fp_id, int propagation_id, int lvl, ICoordObject prepare_migration_data)
-  void execute_finish_migration(ICoordTupleGNode tuple, int fp_id, int propagation_id, int lvl, ICoordObject finish_migration_data)
-  void execute_we_have_splitted(ICoordTupleGNode tuple, int fp_id, int propagation_id, int lvl, ICoordObject we_have_splitted_data)
+  void execute_prepare_migration(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject prepare_migration_data)
+  void execute_finish_migration(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject finish_migration_data)
+  void execute_we_have_splitted(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject we_have_splitted_data)
 Errors
  NeighborhoodRequestArcError(TOO_MANY_ARCS,TWO_ARCS_ON_COLLISION_DOMAIN,GENERIC)
  QspnNotAcceptedError(GENERIC)

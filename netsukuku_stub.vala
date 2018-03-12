@@ -62,9 +62,9 @@ namespace Netsukuku
 
         public interface ICoordinatorManagerStub : Object
         {
-            public abstract void execute_prepare_migration(ICoordTupleGNode tuple, int fp_id, int propagation_id, int lvl, ICoordObject prepare_migration_data) throws StubError, DeserializeError;
-            public abstract void execute_finish_migration(ICoordTupleGNode tuple, int fp_id, int propagation_id, int lvl, ICoordObject finish_migration_data) throws StubError, DeserializeError;
-            public abstract void execute_we_have_splitted(ICoordTupleGNode tuple, int fp_id, int propagation_id, int lvl, ICoordObject we_have_splitted_data) throws StubError, DeserializeError;
+            public abstract void execute_prepare_migration(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject prepare_migration_data) throws StubError, DeserializeError;
+            public abstract void execute_finish_migration(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject finish_migration_data) throws StubError, DeserializeError;
+            public abstract void execute_we_have_splitted(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject we_have_splitted_data) throws StubError, DeserializeError;
         }
 
         public interface IAddressManagerStub : Object
@@ -1403,7 +1403,7 @@ namespace Netsukuku
                 this.rmt = rmt;
             }
 
-            public void execute_prepare_migration(ICoordTupleGNode arg0, int arg1, int arg2, int arg3, ICoordObject arg4) throws StubError, DeserializeError
+            public void execute_prepare_migration(ICoordTupleGNode arg0, int64 arg1, int arg2, int arg3, ICoordObject arg4) throws StubError, DeserializeError
             {
                 string m_name = "addr.coordinator_manager.execute_prepare_migration";
                 ArrayList<string> args = new ArrayList<string>();
@@ -1412,7 +1412,7 @@ namespace Netsukuku
                     args.add(prepare_argument_object(arg0));
                 }
                 {
-                    // serialize arg1 (int fp_id)
+                    // serialize arg1 (int64 fp_id)
                     args.add(prepare_argument_int64(arg1));
                 }
                 {
@@ -1460,7 +1460,7 @@ namespace Netsukuku
                 return;
             }
 
-            public void execute_finish_migration(ICoordTupleGNode arg0, int arg1, int arg2, int arg3, ICoordObject arg4) throws StubError, DeserializeError
+            public void execute_finish_migration(ICoordTupleGNode arg0, int64 arg1, int arg2, int arg3, ICoordObject arg4) throws StubError, DeserializeError
             {
                 string m_name = "addr.coordinator_manager.execute_finish_migration";
                 ArrayList<string> args = new ArrayList<string>();
@@ -1469,7 +1469,7 @@ namespace Netsukuku
                     args.add(prepare_argument_object(arg0));
                 }
                 {
-                    // serialize arg1 (int fp_id)
+                    // serialize arg1 (int64 fp_id)
                     args.add(prepare_argument_int64(arg1));
                 }
                 {
@@ -1517,7 +1517,7 @@ namespace Netsukuku
                 return;
             }
 
-            public void execute_we_have_splitted(ICoordTupleGNode arg0, int arg1, int arg2, int arg3, ICoordObject arg4) throws StubError, DeserializeError
+            public void execute_we_have_splitted(ICoordTupleGNode arg0, int64 arg1, int arg2, int arg3, ICoordObject arg4) throws StubError, DeserializeError
             {
                 string m_name = "addr.coordinator_manager.execute_we_have_splitted";
                 ArrayList<string> args = new ArrayList<string>();
@@ -1526,7 +1526,7 @@ namespace Netsukuku
                     args.add(prepare_argument_object(arg0));
                 }
                 {
-                    // serialize arg1 (int fp_id)
+                    // serialize arg1 (int64 fp_id)
                     args.add(prepare_argument_int64(arg1));
                 }
                 {

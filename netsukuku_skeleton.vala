@@ -63,9 +63,9 @@ namespace Netsukuku
 
         public interface ICoordinatorManagerSkeleton : Object
         {
-            public abstract void execute_prepare_migration(ICoordTupleGNode tuple, int fp_id, int propagation_id, int lvl, ICoordObject prepare_migration_data, CallerInfo? caller=null);
-            public abstract void execute_finish_migration(ICoordTupleGNode tuple, int fp_id, int propagation_id, int lvl, ICoordObject finish_migration_data, CallerInfo? caller=null);
-            public abstract void execute_we_have_splitted(ICoordTupleGNode tuple, int fp_id, int propagation_id, int lvl, ICoordObject we_have_splitted_data, CallerInfo? caller=null);
+            public abstract void execute_prepare_migration(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject prepare_migration_data, CallerInfo? caller=null);
+            public abstract void execute_finish_migration(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject finish_migration_data, CallerInfo? caller=null);
+            public abstract void execute_we_have_splitted(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject we_have_splitted_data, CallerInfo? caller=null);
         }
 
         public interface IAddressManagerSkeleton : Object
@@ -1246,7 +1246,7 @@ namespace Netsukuku
 
                         // arguments:
                         ICoordTupleGNode arg0;
-                        int arg1;
+                        int64 arg1;
                         int arg2;
                         int arg3;
                         ICoordObject arg4;
@@ -1273,14 +1273,12 @@ namespace Netsukuku
                             j++;
                         }
                         {
-                            // deserialize arg1 (int fp_id)
+                            // deserialize arg1 (int64 fp_id)
                             string arg_name = "fp_id";
                             string doing = @"Reading argument '$(arg_name)' for $(m_name)";
                             try {
                                 int64 val;
                                 val = read_argument_int64_notnull(args[j]);
-                                if (val > int.MAX || val < int.MIN)
-                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
                                 arg1 = (int)val;
                             } catch (HelperNotJsonError e) {
                                 critical(@"Error parsing JSON for argument: $(e.message)");
@@ -1359,7 +1357,7 @@ namespace Netsukuku
 
                         // arguments:
                         ICoordTupleGNode arg0;
-                        int arg1;
+                        int64 arg1;
                         int arg2;
                         int arg3;
                         ICoordObject arg4;
@@ -1386,14 +1384,12 @@ namespace Netsukuku
                             j++;
                         }
                         {
-                            // deserialize arg1 (int fp_id)
+                            // deserialize arg1 (int64 fp_id)
                             string arg_name = "fp_id";
                             string doing = @"Reading argument '$(arg_name)' for $(m_name)";
                             try {
                                 int64 val;
                                 val = read_argument_int64_notnull(args[j]);
-                                if (val > int.MAX || val < int.MIN)
-                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
                                 arg1 = (int)val;
                             } catch (HelperNotJsonError e) {
                                 critical(@"Error parsing JSON for argument: $(e.message)");
@@ -1472,7 +1468,7 @@ namespace Netsukuku
 
                         // arguments:
                         ICoordTupleGNode arg0;
-                        int arg1;
+                        int64 arg1;
                         int arg2;
                         int arg3;
                         ICoordObject arg4;
@@ -1499,14 +1495,12 @@ namespace Netsukuku
                             j++;
                         }
                         {
-                            // deserialize arg1 (int fp_id)
+                            // deserialize arg1 (int64 fp_id)
                             string arg_name = "fp_id";
                             string doing = @"Reading argument '$(arg_name)' for $(m_name)";
                             try {
                                 int64 val;
                                 val = read_argument_int64_notnull(args[j]);
-                                if (val > int.MAX || val < int.MIN)
-                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
                                 arg1 = (int)val;
                             } catch (HelperNotJsonError e) {
                                 critical(@"Error parsing JSON for argument: $(e.message)");
