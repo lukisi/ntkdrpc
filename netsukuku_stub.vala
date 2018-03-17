@@ -64,6 +64,8 @@ namespace Netsukuku
         {
             public abstract void execute_prepare_migration(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject prepare_migration_data) throws StubError, DeserializeError;
             public abstract void execute_finish_migration(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject finish_migration_data) throws StubError, DeserializeError;
+            public abstract void execute_prepare_enter(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject prepare_enter_data) throws StubError, DeserializeError;
+            public abstract void execute_finish_enter(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject finish_enter_data) throws StubError, DeserializeError;
             public abstract void execute_we_have_splitted(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject we_have_splitted_data) throws StubError, DeserializeError;
         }
 
@@ -1482,6 +1484,120 @@ namespace Netsukuku
                 }
                 {
                     // serialize arg4 (ICoordObject finish_migration_data)
+                    args.add(prepare_argument_object(arg4));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                try {
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return;
+            }
+
+            public void execute_prepare_enter(ICoordTupleGNode arg0, int64 arg1, int arg2, int arg3, ICoordObject arg4) throws StubError, DeserializeError
+            {
+                string m_name = "addr.coordinator_manager.execute_prepare_enter";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (ICoordTupleGNode tuple)
+                    args.add(prepare_argument_object(arg0));
+                }
+                {
+                    // serialize arg1 (int64 fp_id)
+                    args.add(prepare_argument_int64(arg1));
+                }
+                {
+                    // serialize arg2 (int propagation_id)
+                    args.add(prepare_argument_int64(arg2));
+                }
+                {
+                    // serialize arg3 (int lvl)
+                    args.add(prepare_argument_int64(arg3));
+                }
+                {
+                    // serialize arg4 (ICoordObject prepare_enter_data)
+                    args.add(prepare_argument_object(arg4));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                try {
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return;
+            }
+
+            public void execute_finish_enter(ICoordTupleGNode arg0, int64 arg1, int arg2, int arg3, ICoordObject arg4) throws StubError, DeserializeError
+            {
+                string m_name = "addr.coordinator_manager.execute_finish_enter";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (ICoordTupleGNode tuple)
+                    args.add(prepare_argument_object(arg0));
+                }
+                {
+                    // serialize arg1 (int64 fp_id)
+                    args.add(prepare_argument_int64(arg1));
+                }
+                {
+                    // serialize arg2 (int propagation_id)
+                    args.add(prepare_argument_int64(arg2));
+                }
+                {
+                    // serialize arg3 (int lvl)
+                    args.add(prepare_argument_int64(arg3));
+                }
+                {
+                    // serialize arg4 (ICoordObject finish_enter_data)
                     args.add(prepare_argument_object(arg4));
                 }
 

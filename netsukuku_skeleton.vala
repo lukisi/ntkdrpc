@@ -65,6 +65,8 @@ namespace Netsukuku
         {
             public abstract void execute_prepare_migration(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject prepare_migration_data, CallerInfo? caller=null);
             public abstract void execute_finish_migration(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject finish_migration_data, CallerInfo? caller=null);
+            public abstract void execute_prepare_enter(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject prepare_enter_data, CallerInfo? caller=null);
+            public abstract void execute_finish_enter(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject finish_enter_data, CallerInfo? caller=null);
             public abstract void execute_we_have_splitted(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject we_have_splitted_data, CallerInfo? caller=null);
         }
 
@@ -1460,6 +1462,228 @@ namespace Netsukuku
                         }
 
                         addr.coordinator_manager.execute_finish_migration(arg0, arg1, arg2, arg3, arg4, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.coordinator_manager.execute_prepare_enter")
+                    {
+                        if (args.size != 5) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        ICoordTupleGNode arg0;
+                        int64 arg1;
+                        int arg2;
+                        int arg3;
+                        ICoordObject arg4;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (ICoordTupleGNode tuple)
+                            string arg_name = "tuple";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(ICoordTupleGNode), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg0 = (ICoordTupleGNode)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg1 (int64 fp_id)
+                            string arg_name = "fp_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                arg1 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg2 (int propagation_id)
+                            string arg_name = "propagation_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                if (val > int.MAX || val < int.MIN)
+                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
+                                arg2 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg3 (int lvl)
+                            string arg_name = "lvl";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                if (val > int.MAX || val < int.MIN)
+                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
+                                arg3 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg4 (ICoordObject prepare_enter_data)
+                            string arg_name = "prepare_enter_data";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(ICoordObject), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg4 = (ICoordObject)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.coordinator_manager.execute_prepare_enter(arg0, arg1, arg2, arg3, arg4, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.coordinator_manager.execute_finish_enter")
+                    {
+                        if (args.size != 5) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        ICoordTupleGNode arg0;
+                        int64 arg1;
+                        int arg2;
+                        int arg3;
+                        ICoordObject arg4;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (ICoordTupleGNode tuple)
+                            string arg_name = "tuple";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(ICoordTupleGNode), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg0 = (ICoordTupleGNode)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg1 (int64 fp_id)
+                            string arg_name = "fp_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                arg1 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg2 (int propagation_id)
+                            string arg_name = "propagation_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                if (val > int.MAX || val < int.MIN)
+                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
+                                arg2 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg3 (int lvl)
+                            string arg_name = "lvl";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                if (val > int.MAX || val < int.MIN)
+                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
+                                arg3 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg4 (ICoordObject finish_enter_data)
+                            string arg_name = "finish_enter_data";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(ICoordObject), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg4 = (ICoordObject)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.coordinator_manager.execute_finish_enter(arg0, arg1, arg2, arg3, arg4, caller_info);
                         ret = prepare_return_value_null();
                     }
                     else if (m_name == "addr.coordinator_manager.execute_we_have_splitted")
