@@ -70,6 +70,20 @@ namespace Netsukuku
             public abstract void execute_we_have_splitted(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject we_have_splitted_data, CallerInfo? caller=null);
         }
 
+        public interface IHookingManagerSkeleton : Object
+        {
+            public abstract INetworkData retrieve_network_data(bool ask_coord, CallerInfo? caller=null) throws HookingNotPrincipalError;
+            public abstract IEntryData search_migration_path(int lvl, CallerInfo? caller=null) throws NoMigrationPathFoundError, MigrationPathExecuteFailureError;
+            public abstract void route_search_request(ISearchMigrationPathRequest p0, CallerInfo? caller=null);
+            public abstract void route_search_error(ISearchMigrationPathErrorPkt p2, CallerInfo? caller=null);
+            public abstract void route_search_response(ISearchMigrationPathResponse p1, CallerInfo? caller=null);
+            public abstract void route_explore_request(IExploreGNodeRequest p0, CallerInfo? caller=null);
+            public abstract void route_explore_response(IExploreGNodeResponse p1, CallerInfo? caller=null);
+            public abstract void route_delete_reserve_request(IDeleteReservationRequest p0, CallerInfo? caller=null);
+            public abstract void route_mig_request(IRequestPacket p0, CallerInfo? caller=null);
+            public abstract void route_mig_response(IResponsePacket p1, CallerInfo? caller=null);
+        }
+
         public interface IAddressManagerSkeleton : Object
         {
             protected abstract unowned INeighborhoodManagerSkeleton neighborhood_manager_getter();
@@ -82,6 +96,8 @@ namespace Netsukuku
             public IPeersManagerSkeleton peers_manager {get {return peers_manager_getter();}}
             protected abstract unowned ICoordinatorManagerSkeleton coordinator_manager_getter();
             public ICoordinatorManagerSkeleton coordinator_manager {get {return coordinator_manager_getter();}}
+            protected abstract unowned IHookingManagerSkeleton hooking_manager_getter();
+            public IHookingManagerSkeleton hooking_manager {get {return hooking_manager_getter();}}
         }
 
         public interface IRpcDelegate : Object
@@ -1800,6 +1816,346 @@ namespace Netsukuku
                     else
                     {
                         throw new InSkeletonDeserializeError.GENERIC(@"Unknown method in addr.coordinator_manager: \"$(m_name)\"");
+                    }
+                }
+                else if (m_name.has_prefix("addr.hooking_manager."))
+                {
+                    if (m_name == "addr.hooking_manager.retrieve_network_data")
+                    {
+                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        bool arg0;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (bool ask_coord)
+                            string arg_name = "ask_coord";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                arg0 = read_argument_bool_notnull(args[j]);
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        try {
+                            INetworkData result = addr.hooking_manager.retrieve_network_data(arg0, caller_info);
+                            ret = prepare_return_value_object(result);
+                        } catch (HookingNotPrincipalError e) {
+                            string code = "";
+                            if (e is HookingNotPrincipalError.GENERIC) code = "GENERIC";
+                            assert(code != "");
+                            ret = prepare_error("HookingNotPrincipalError", code, e.message);
+                        }
+                    }
+                    else if (m_name == "addr.hooking_manager.search_migration_path")
+                    {
+                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        int arg0;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (int lvl)
+                            string arg_name = "lvl";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                int64 val;
+                                val = read_argument_int64_notnull(args[j]);
+                                if (val > int.MAX || val < int.MIN)
+                                    throw new InSkeletonDeserializeError.GENERIC(@"$(doing): argument overflows size of int");
+                                arg0 = (int)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        try {
+                            IEntryData result = addr.hooking_manager.search_migration_path(arg0, caller_info);
+                            ret = prepare_return_value_object(result);
+                        } catch (NoMigrationPathFoundError e) {
+                            string code = "";
+                            if (e is NoMigrationPathFoundError.GENERIC) code = "GENERIC";
+                            assert(code != "");
+                            ret = prepare_error("NoMigrationPathFoundError", code, e.message);
+                        } catch (MigrationPathExecuteFailureError e) {
+                            string code = "";
+                            if (e is MigrationPathExecuteFailureError.GENERIC) code = "GENERIC";
+                            assert(code != "");
+                            ret = prepare_error("MigrationPathExecuteFailureError", code, e.message);
+                        }
+                    }
+                    else if (m_name == "addr.hooking_manager.route_search_request")
+                    {
+                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        ISearchMigrationPathRequest arg0;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (ISearchMigrationPathRequest p0)
+                            string arg_name = "p0";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(ISearchMigrationPathRequest), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg0 = (ISearchMigrationPathRequest)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.hooking_manager.route_search_request(arg0, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.hooking_manager.route_search_error")
+                    {
+                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        ISearchMigrationPathErrorPkt arg0;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (ISearchMigrationPathErrorPkt p2)
+                            string arg_name = "p2";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(ISearchMigrationPathErrorPkt), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg0 = (ISearchMigrationPathErrorPkt)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.hooking_manager.route_search_error(arg0, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.hooking_manager.route_search_response")
+                    {
+                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        ISearchMigrationPathResponse arg0;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (ISearchMigrationPathResponse p1)
+                            string arg_name = "p1";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(ISearchMigrationPathResponse), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg0 = (ISearchMigrationPathResponse)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.hooking_manager.route_search_response(arg0, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.hooking_manager.route_explore_request")
+                    {
+                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        IExploreGNodeRequest arg0;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (IExploreGNodeRequest p0)
+                            string arg_name = "p0";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IExploreGNodeRequest), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg0 = (IExploreGNodeRequest)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.hooking_manager.route_explore_request(arg0, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.hooking_manager.route_explore_response")
+                    {
+                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        IExploreGNodeResponse arg0;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (IExploreGNodeResponse p1)
+                            string arg_name = "p1";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IExploreGNodeResponse), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg0 = (IExploreGNodeResponse)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.hooking_manager.route_explore_response(arg0, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.hooking_manager.route_delete_reserve_request")
+                    {
+                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        IDeleteReservationRequest arg0;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (IDeleteReservationRequest p0)
+                            string arg_name = "p0";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IDeleteReservationRequest), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg0 = (IDeleteReservationRequest)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.hooking_manager.route_delete_reserve_request(arg0, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.hooking_manager.route_mig_request")
+                    {
+                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        IRequestPacket arg0;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (IRequestPacket p0)
+                            string arg_name = "p0";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IRequestPacket), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg0 = (IRequestPacket)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.hooking_manager.route_mig_request(arg0, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.hooking_manager.route_mig_response")
+                    {
+                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        IResponsePacket arg0;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (IResponsePacket p1)
+                            string arg_name = "p1";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(IResponsePacket), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg0 = (IResponsePacket)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.hooking_manager.route_mig_response(arg0, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else
+                    {
+                        throw new InSkeletonDeserializeError.GENERIC(@"Unknown method in addr.hooking_manager: \"$(m_name)\"");
                     }
                 }
                 else

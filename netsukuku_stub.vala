@@ -69,6 +69,20 @@ namespace Netsukuku
             public abstract void execute_we_have_splitted(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject we_have_splitted_data) throws StubError, DeserializeError;
         }
 
+        public interface IHookingManagerStub : Object
+        {
+            public abstract INetworkData retrieve_network_data(bool ask_coord) throws HookingNotPrincipalError, StubError, DeserializeError;
+            public abstract IEntryData search_migration_path(int lvl) throws NoMigrationPathFoundError, MigrationPathExecuteFailureError, StubError, DeserializeError;
+            public abstract void route_search_request(ISearchMigrationPathRequest p0) throws StubError, DeserializeError;
+            public abstract void route_search_error(ISearchMigrationPathErrorPkt p2) throws StubError, DeserializeError;
+            public abstract void route_search_response(ISearchMigrationPathResponse p1) throws StubError, DeserializeError;
+            public abstract void route_explore_request(IExploreGNodeRequest p0) throws StubError, DeserializeError;
+            public abstract void route_explore_response(IExploreGNodeResponse p1) throws StubError, DeserializeError;
+            public abstract void route_delete_reserve_request(IDeleteReservationRequest p0) throws StubError, DeserializeError;
+            public abstract void route_mig_request(IRequestPacket p0) throws StubError, DeserializeError;
+            public abstract void route_mig_response(IResponsePacket p1) throws StubError, DeserializeError;
+        }
+
         public interface IAddressManagerStub : Object
         {
             protected abstract unowned INeighborhoodManagerStub neighborhood_manager_getter();
@@ -81,6 +95,8 @@ namespace Netsukuku
             public IPeersManagerStub peers_manager {get {return peers_manager_getter();}}
             protected abstract unowned ICoordinatorManagerStub coordinator_manager_getter();
             public ICoordinatorManagerStub coordinator_manager {get {return coordinator_manager_getter();}}
+            protected abstract unowned IHookingManagerStub hooking_manager_getter();
+            public IHookingManagerStub hooking_manager {get {return hooking_manager_getter();}}
         }
 
         public IAddressManagerStub get_addr_tcp_client(string peer_address, uint16 peer_port, ISourceID source_id, IUnicastID unicast_id)
@@ -102,6 +118,7 @@ namespace Netsukuku
             private QspnManagerRemote _qspn_manager;
             private PeersManagerRemote _peers_manager;
             private CoordinatorManagerRemote _coordinator_manager;
+            private HookingManagerRemote _hooking_manager;
             public AddressManagerTcpClientRootStub(string peer_address, uint16 peer_port, ISourceID source_id, IUnicastID unicast_id)
             {
                 this.peer_address = peer_address;
@@ -116,6 +133,7 @@ namespace Netsukuku
                 _qspn_manager = new QspnManagerRemote(this.call);
                 _peers_manager = new PeersManagerRemote(this.call);
                 _coordinator_manager = new CoordinatorManagerRemote(this.call);
+                _hooking_manager = new HookingManagerRemote(this.call);
             }
 
             public bool hurry_getter()
@@ -163,6 +181,11 @@ namespace Netsukuku
                 return _coordinator_manager;
             }
 
+            protected unowned IHookingManagerStub hooking_manager_getter()
+            {
+                return _hooking_manager;
+            }
+
             private string call(string m_name, Gee.List<string> arguments) throws ZCDError, StubError
             {
                 if (hurry && !client.is_queue_empty())
@@ -197,6 +220,7 @@ namespace Netsukuku
             private QspnManagerRemote _qspn_manager;
             private PeersManagerRemote _peers_manager;
             private CoordinatorManagerRemote _coordinator_manager;
+            private HookingManagerRemote _hooking_manager;
             public AddressManagerUnicastRootStub(string dev, uint16 port, string src_ip, ISourceID source_id, IUnicastID unicast_id, bool wait_reply)
             {
                 s_source_id = prepare_direct_object(source_id);
@@ -210,6 +234,7 @@ namespace Netsukuku
                 _qspn_manager = new QspnManagerRemote(this.call);
                 _peers_manager = new PeersManagerRemote(this.call);
                 _coordinator_manager = new CoordinatorManagerRemote(this.call);
+                _hooking_manager = new HookingManagerRemote(this.call);
             }
 
             protected unowned INeighborhoodManagerStub neighborhood_manager_getter()
@@ -235,6 +260,11 @@ namespace Netsukuku
             protected unowned ICoordinatorManagerStub coordinator_manager_getter()
             {
                 return _coordinator_manager;
+            }
+
+            protected unowned IHookingManagerStub hooking_manager_getter()
+            {
+                return _hooking_manager;
             }
 
             private string call(string m_name, Gee.List<string> arguments) throws ZCDError, StubError
@@ -262,6 +292,7 @@ namespace Netsukuku
             private QspnManagerRemote _qspn_manager;
             private PeersManagerRemote _peers_manager;
             private CoordinatorManagerRemote _coordinator_manager;
+            private HookingManagerRemote _hooking_manager;
             public AddressManagerBroadcastRootStub
             (Gee.List<string> devs, Gee.List<string> src_ips, uint16 port, ISourceID source_id, IBroadcastID broadcast_id, IAckCommunicator? notify_ack=null)
             {
@@ -278,6 +309,7 @@ namespace Netsukuku
                 _qspn_manager = new QspnManagerRemote(this.call);
                 _peers_manager = new PeersManagerRemote(this.call);
                 _coordinator_manager = new CoordinatorManagerRemote(this.call);
+                _hooking_manager = new HookingManagerRemote(this.call);
             }
 
             protected unowned INeighborhoodManagerStub neighborhood_manager_getter()
@@ -303,6 +335,11 @@ namespace Netsukuku
             protected unowned ICoordinatorManagerStub coordinator_manager_getter()
             {
                 return _coordinator_manager;
+            }
+
+            protected unowned IHookingManagerStub hooking_manager_getter()
+            {
+                return _hooking_manager;
             }
 
             private string call(string m_name, Gee.List<string> arguments) throws ZCDError, StubError
@@ -1656,6 +1693,436 @@ namespace Netsukuku
                 {
                     // serialize arg4 (ICoordObject we_have_splitted_data)
                     args.add(prepare_argument_object(arg4));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                try {
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return;
+            }
+
+        }
+
+        internal class HookingManagerRemote : Object, IHookingManagerStub
+        {
+            private unowned FakeRmt rmt;
+            public HookingManagerRemote(FakeRmt rmt)
+            {
+                this.rmt = rmt;
+            }
+
+            public INetworkData retrieve_network_data(bool arg0) throws HookingNotPrincipalError, StubError, DeserializeError
+            {
+                string m_name = "addr.hooking_manager.retrieve_network_data";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (bool ask_coord)
+                    args.add(prepare_argument_boolean(arg0));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                Object ret;
+                try {
+                    ret = read_return_value_object_notnull(typeof(INetworkData), resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "HookingNotPrincipalError.GENERIC")
+                        throw new HookingNotPrincipalError.GENERIC(error_message);
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                if (ret is ISerializable)
+                    if (!((ISerializable)ret).check_deserialization())
+                        throw new DeserializeError.GENERIC(@"$(doing): instance of $(ret.get_type().name()) has not been fully deserialized");
+                return (INetworkData)ret;
+            }
+
+            public IEntryData search_migration_path(int arg0) throws NoMigrationPathFoundError, MigrationPathExecuteFailureError, StubError, DeserializeError
+            {
+                string m_name = "addr.hooking_manager.search_migration_path";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (int lvl)
+                    args.add(prepare_argument_int64(arg0));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                Object ret;
+                try {
+                    ret = read_return_value_object_notnull(typeof(IEntryData), resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "NoMigrationPathFoundError.GENERIC")
+                        throw new NoMigrationPathFoundError.GENERIC(error_message);
+                    if (error_domain_code == "MigrationPathExecuteFailureError.GENERIC")
+                        throw new MigrationPathExecuteFailureError.GENERIC(error_message);
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                if (ret is ISerializable)
+                    if (!((ISerializable)ret).check_deserialization())
+                        throw new DeserializeError.GENERIC(@"$(doing): instance of $(ret.get_type().name()) has not been fully deserialized");
+                return (IEntryData)ret;
+            }
+
+            public void route_search_request(ISearchMigrationPathRequest arg0) throws StubError, DeserializeError
+            {
+                string m_name = "addr.hooking_manager.route_search_request";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (ISearchMigrationPathRequest p0)
+                    args.add(prepare_argument_object(arg0));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                try {
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return;
+            }
+
+            public void route_search_error(ISearchMigrationPathErrorPkt arg0) throws StubError, DeserializeError
+            {
+                string m_name = "addr.hooking_manager.route_search_error";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (ISearchMigrationPathErrorPkt p2)
+                    args.add(prepare_argument_object(arg0));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                try {
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return;
+            }
+
+            public void route_search_response(ISearchMigrationPathResponse arg0) throws StubError, DeserializeError
+            {
+                string m_name = "addr.hooking_manager.route_search_response";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (ISearchMigrationPathResponse p1)
+                    args.add(prepare_argument_object(arg0));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                try {
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return;
+            }
+
+            public void route_explore_request(IExploreGNodeRequest arg0) throws StubError, DeserializeError
+            {
+                string m_name = "addr.hooking_manager.route_explore_request";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (IExploreGNodeRequest p0)
+                    args.add(prepare_argument_object(arg0));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                try {
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return;
+            }
+
+            public void route_explore_response(IExploreGNodeResponse arg0) throws StubError, DeserializeError
+            {
+                string m_name = "addr.hooking_manager.route_explore_response";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (IExploreGNodeResponse p1)
+                    args.add(prepare_argument_object(arg0));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                try {
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return;
+            }
+
+            public void route_delete_reserve_request(IDeleteReservationRequest arg0) throws StubError, DeserializeError
+            {
+                string m_name = "addr.hooking_manager.route_delete_reserve_request";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (IDeleteReservationRequest p0)
+                    args.add(prepare_argument_object(arg0));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                try {
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return;
+            }
+
+            public void route_mig_request(IRequestPacket arg0) throws StubError, DeserializeError
+            {
+                string m_name = "addr.hooking_manager.route_mig_request";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (IRequestPacket p0)
+                    args.add(prepare_argument_object(arg0));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+                // The following catch is to be added only for methods that return void.
+                catch (StubError.DID_NOT_WAIT_REPLY e) {return;}
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                try {
+                    read_return_value_void(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return;
+            }
+
+            public void route_mig_response(IResponsePacket arg0) throws StubError, DeserializeError
+            {
+                string m_name = "addr.hooking_manager.route_mig_response";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (IResponsePacket p1)
+                    args.add(prepare_argument_object(arg0));
                 }
 
                 string resp;

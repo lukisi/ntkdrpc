@@ -53,12 +53,26 @@ AddressManager addr
   void execute_prepare_enter(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject prepare_enter_data)
   void execute_finish_enter(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject finish_enter_data)
   void execute_we_have_splitted(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject we_have_splitted_data)
+ HookingManager hooking_manager
+  INetworkData retrieve_network_data(bool ask_coord) throws HookingNotPrincipalError
+  IEntryData search_migration_path(int lvl) throws NoMigrationPathFoundError, MigrationPathExecuteFailureError
+  void route_search_request(ISearchMigrationPathRequest p0)
+  void route_search_error(ISearchMigrationPathErrorPkt p2)
+  void route_search_response(ISearchMigrationPathResponse p1)
+  void route_explore_request(IExploreGNodeRequest p0)
+  void route_explore_response(IExploreGNodeResponse p1)
+  void route_delete_reserve_request(IDeleteReservationRequest p0)
+  void route_mig_request(IRequestPacket p0)
+  void route_mig_response(IResponsePacket p1)
 Errors
  NeighborhoodRequestArcError(TOO_MANY_ARCS,TWO_ARCS_ON_COLLISION_DOMAIN,GENERIC)
  QspnNotAcceptedError(GENERIC)
  QspnBootstrapInProgressError(GENERIC)
  PeersUnknownMessageError(GENERIC)
  PeersInvalidRequest(GENERIC)
+ HookingNotPrincipalError(GENERIC)
+ NoMigrationPathFoundError(GENERIC)
+ MigrationPathExecuteFailureError(GENERIC)
 
 ==========================================
  */
@@ -87,6 +101,18 @@ namespace Netsukuku
     }
 
     public errordomain PeersInvalidRequest {
+        GENERIC,
+    }
+
+    public errordomain HookingNotPrincipalError {
+        GENERIC,
+    }
+
+    public errordomain NoMigrationPathFoundError {
+        GENERIC,
+    }
+
+    public errordomain MigrationPathExecuteFailureError {
         GENERIC,
     }
 
@@ -139,6 +165,46 @@ namespace Netsukuku
     }
 
     public interface ICoordObject : Object
+    {
+    }
+
+    public interface INetworkData : Object
+    {
+    }
+
+    public interface IEntryData : Object
+    {
+    }
+
+    public interface ISearchMigrationPathRequest : Object
+    {
+    }
+
+    public interface ISearchMigrationPathErrorPkt : Object
+    {
+    }
+
+    public interface ISearchMigrationPathResponse : Object
+    {
+    }
+
+    public interface IExploreGNodeRequest : Object
+    {
+    }
+
+    public interface IExploreGNodeResponse : Object
+    {
+    }
+
+    public interface IDeleteReservationRequest : Object
+    {
+    }
+
+    public interface IRequestPacket : Object
+    {
+    }
+
+    public interface IResponsePacket : Object
     {
     }
 
