@@ -24,9 +24,10 @@ namespace Netsukuku
 {
         public interface INeighborhoodManagerSkeleton : Object
         {
-            public abstract void here_i_am(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr, CallerInfo? caller=null);
-            public abstract void request_arc(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr, CallerInfo? caller=null) throws NeighborhoodRequestArcError;
-            public abstract void remove_arc(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr, CallerInfo? caller=null);
+            public abstract void here_i_am(INeighborhoodNodeIDMessage my_id, string my_mac, string my_nic_addr, CallerInfo? caller=null);
+            public abstract void request_arc(INeighborhoodNodeIDMessage your_id, string your_mac, string your_nic_addr, INeighborhoodNodeIDMessage my_id, string my_mac, string my_nic_addr, CallerInfo? caller=null);
+            public abstract bool can_you_export(bool i_can_export, CallerInfo? caller=null);
+            public abstract void remove_arc(INeighborhoodNodeIDMessage your_id, string your_mac, string your_nic_addr, INeighborhoodNodeIDMessage my_id, string my_mac, string my_nic_addr, CallerInfo? caller=null);
             public abstract void nop(CallerInfo? caller=null);
         }
 
@@ -161,8 +162,8 @@ namespace Netsukuku
                             j++;
                         }
                         {
-                            // deserialize arg1 (string mac)
-                            string arg_name = "mac";
+                            // deserialize arg1 (string my_mac)
+                            string arg_name = "my_mac";
                             string doing = @"Reading argument '$(arg_name)' for $(m_name)";
                             try {
                                 arg1 = read_argument_string_notnull(args[j]);
@@ -176,8 +177,8 @@ namespace Netsukuku
                             j++;
                         }
                         {
-                            // deserialize arg2 (string nic_addr)
-                            string arg_name = "nic_addr";
+                            // deserialize arg2 (string my_nic_addr)
+                            string arg_name = "my_nic_addr";
                             string doing = @"Reading argument '$(arg_name)' for $(m_name)";
                             try {
                                 arg2 = read_argument_string_notnull(args[j]);
@@ -196,17 +197,20 @@ namespace Netsukuku
                     }
                     else if (m_name == "addr.neighborhood_manager.request_arc")
                     {
-                        if (args.size != 3) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+                        if (args.size != 6) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
 
                         // arguments:
                         INeighborhoodNodeIDMessage arg0;
                         string arg1;
                         string arg2;
+                        INeighborhoodNodeIDMessage arg3;
+                        string arg4;
+                        string arg5;
                         // position:
                         int j = 0;
                         {
-                            // deserialize arg0 (INeighborhoodNodeIDMessage my_id)
-                            string arg_name = "my_id";
+                            // deserialize arg0 (INeighborhoodNodeIDMessage your_id)
+                            string arg_name = "your_id";
                             string doing = @"Reading argument '$(arg_name)' for $(m_name)";
                             try {
                                 Object val;
@@ -225,8 +229,8 @@ namespace Netsukuku
                             j++;
                         }
                         {
-                            // deserialize arg1 (string mac)
-                            string arg_name = "mac";
+                            // deserialize arg1 (string your_mac)
+                            string arg_name = "your_mac";
                             string doing = @"Reading argument '$(arg_name)' for $(m_name)";
                             try {
                                 arg1 = read_argument_string_notnull(args[j]);
@@ -240,8 +244,8 @@ namespace Netsukuku
                             j++;
                         }
                         {
-                            // deserialize arg2 (string nic_addr)
-                            string arg_name = "nic_addr";
+                            // deserialize arg2 (string your_nic_addr)
+                            string arg_name = "your_nic_addr";
                             string doing = @"Reading argument '$(arg_name)' for $(m_name)";
                             try {
                                 arg2 = read_argument_string_notnull(args[j]);
@@ -254,32 +258,103 @@ namespace Netsukuku
                             }
                             j++;
                         }
-
-                        try {
-                            addr.neighborhood_manager.request_arc(arg0, arg1, arg2, caller_info);
-                            ret = prepare_return_value_null();
-                        } catch (NeighborhoodRequestArcError e) {
-                            string code = "";
-                            if (e is NeighborhoodRequestArcError.TOO_MANY_ARCS) code = "TOO_MANY_ARCS";
-                            if (e is NeighborhoodRequestArcError.TWO_ARCS_ON_COLLISION_DOMAIN) code = "TWO_ARCS_ON_COLLISION_DOMAIN";
-                            if (e is NeighborhoodRequestArcError.GENERIC) code = "GENERIC";
-                            assert(code != "");
-                            ret = prepare_error("NeighborhoodRequestArcError", code, e.message);
+                        {
+                            // deserialize arg3 (INeighborhoodNodeIDMessage my_id)
+                            string arg_name = "my_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(INeighborhoodNodeIDMessage), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg3 = (INeighborhoodNodeIDMessage)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
                         }
+                        {
+                            // deserialize arg4 (string my_mac)
+                            string arg_name = "my_mac";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                arg4 = read_argument_string_notnull(args[j]);
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg5 (string my_nic_addr)
+                            string arg_name = "my_nic_addr";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                arg5 = read_argument_string_notnull(args[j]);
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        addr.neighborhood_manager.request_arc(arg0, arg1, arg2, arg3, arg4, arg5, caller_info);
+                        ret = prepare_return_value_null();
+                    }
+                    else if (m_name == "addr.neighborhood_manager.can_you_export")
+                    {
+                        if (args.size != 1) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+
+                        // arguments:
+                        bool arg0;
+                        // position:
+                        int j = 0;
+                        {
+                            // deserialize arg0 (bool i_can_export)
+                            string arg_name = "i_can_export";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                arg0 = read_argument_bool_notnull(args[j]);
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+
+                        bool result = addr.neighborhood_manager.can_you_export(arg0, caller_info);
+                        ret = prepare_return_value_boolean(result);
                     }
                     else if (m_name == "addr.neighborhood_manager.remove_arc")
                     {
-                        if (args.size != 3) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
+                        if (args.size != 6) throw new InSkeletonDeserializeError.GENERIC(@"Wrong number of arguments for $(m_name)");
 
                         // arguments:
                         INeighborhoodNodeIDMessage arg0;
                         string arg1;
                         string arg2;
+                        INeighborhoodNodeIDMessage arg3;
+                        string arg4;
+                        string arg5;
                         // position:
                         int j = 0;
                         {
-                            // deserialize arg0 (INeighborhoodNodeIDMessage my_id)
-                            string arg_name = "my_id";
+                            // deserialize arg0 (INeighborhoodNodeIDMessage your_id)
+                            string arg_name = "your_id";
                             string doing = @"Reading argument '$(arg_name)' for $(m_name)";
                             try {
                                 Object val;
@@ -298,8 +373,8 @@ namespace Netsukuku
                             j++;
                         }
                         {
-                            // deserialize arg1 (string mac)
-                            string arg_name = "mac";
+                            // deserialize arg1 (string your_mac)
+                            string arg_name = "your_mac";
                             string doing = @"Reading argument '$(arg_name)' for $(m_name)";
                             try {
                                 arg1 = read_argument_string_notnull(args[j]);
@@ -313,8 +388,8 @@ namespace Netsukuku
                             j++;
                         }
                         {
-                            // deserialize arg2 (string nic_addr)
-                            string arg_name = "nic_addr";
+                            // deserialize arg2 (string your_nic_addr)
+                            string arg_name = "your_nic_addr";
                             string doing = @"Reading argument '$(arg_name)' for $(m_name)";
                             try {
                                 arg2 = read_argument_string_notnull(args[j]);
@@ -327,8 +402,58 @@ namespace Netsukuku
                             }
                             j++;
                         }
+                        {
+                            // deserialize arg3 (INeighborhoodNodeIDMessage my_id)
+                            string arg_name = "my_id";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                Object val;
+                                val = read_argument_object_notnull(typeof(INeighborhoodNodeIDMessage), args[j]);
+                                if (val is ISerializable)
+                                    if (!((ISerializable)val).check_deserialization())
+                                        throw new InSkeletonDeserializeError.GENERIC(@"$(doing): instance of $(val.get_type().name()) has not been fully deserialized");
+                                arg3 = (INeighborhoodNodeIDMessage)val;
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg4 (string my_mac)
+                            string arg_name = "my_mac";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                arg4 = read_argument_string_notnull(args[j]);
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
+                        {
+                            // deserialize arg5 (string my_nic_addr)
+                            string arg_name = "my_nic_addr";
+                            string doing = @"Reading argument '$(arg_name)' for $(m_name)";
+                            try {
+                                arg5 = read_argument_string_notnull(args[j]);
+                            } catch (HelperNotJsonError e) {
+                                critical(@"Error parsing JSON for argument: $(e.message)");
+                                critical(@" method-name: $(m_name)");
+                                error(@" argument #$(j): $(args[j])");
+                            } catch (HelperDeserializeError e) {
+                                throw new InSkeletonDeserializeError.GENERIC(@"$(doing): $(e.message)");
+                            }
+                            j++;
+                        }
 
-                        addr.neighborhood_manager.remove_arc(arg0, arg1, arg2, caller_info);
+                        addr.neighborhood_manager.remove_arc(arg0, arg1, arg2, arg3, arg4, arg5, caller_info);
                         ret = prepare_return_value_null();
                     }
                     else if (m_name == "addr.neighborhood_manager.nop")

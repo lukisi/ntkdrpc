@@ -23,9 +23,10 @@ namespace Netsukuku
 {
         public interface INeighborhoodManagerStub : Object
         {
-            public abstract void here_i_am(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr) throws StubError, DeserializeError;
-            public abstract void request_arc(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr) throws NeighborhoodRequestArcError, StubError, DeserializeError;
-            public abstract void remove_arc(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr) throws StubError, DeserializeError;
+            public abstract void here_i_am(INeighborhoodNodeIDMessage my_id, string my_mac, string my_nic_addr) throws StubError, DeserializeError;
+            public abstract void request_arc(INeighborhoodNodeIDMessage your_id, string your_mac, string your_nic_addr, INeighborhoodNodeIDMessage my_id, string my_mac, string my_nic_addr) throws StubError, DeserializeError;
+            public abstract bool can_you_export(bool i_can_export) throws StubError, DeserializeError;
+            public abstract void remove_arc(INeighborhoodNodeIDMessage your_id, string your_mac, string your_nic_addr, INeighborhoodNodeIDMessage my_id, string my_mac, string my_nic_addr) throws StubError, DeserializeError;
             public abstract void nop() throws StubError, DeserializeError;
         }
 
@@ -365,11 +366,11 @@ namespace Netsukuku
                     args.add(prepare_argument_object(arg0));
                 }
                 {
-                    // serialize arg1 (string mac)
+                    // serialize arg1 (string my_mac)
                     args.add(prepare_argument_string(arg1));
                 }
                 {
-                    // serialize arg2 (string nic_addr)
+                    // serialize arg2 (string my_nic_addr)
                     args.add(prepare_argument_string(arg2));
                 }
 
@@ -405,21 +406,33 @@ namespace Netsukuku
                 return;
             }
 
-            public void request_arc(INeighborhoodNodeIDMessage arg0, string arg1, string arg2) throws NeighborhoodRequestArcError, StubError, DeserializeError
+            public void request_arc(INeighborhoodNodeIDMessage arg0, string arg1, string arg2, INeighborhoodNodeIDMessage arg3, string arg4, string arg5) throws StubError, DeserializeError
             {
                 string m_name = "addr.neighborhood_manager.request_arc";
                 ArrayList<string> args = new ArrayList<string>();
                 {
-                    // serialize arg0 (INeighborhoodNodeIDMessage my_id)
+                    // serialize arg0 (INeighborhoodNodeIDMessage your_id)
                     args.add(prepare_argument_object(arg0));
                 }
                 {
-                    // serialize arg1 (string mac)
+                    // serialize arg1 (string your_mac)
                     args.add(prepare_argument_string(arg1));
                 }
                 {
-                    // serialize arg2 (string nic_addr)
+                    // serialize arg2 (string your_nic_addr)
                     args.add(prepare_argument_string(arg2));
+                }
+                {
+                    // serialize arg3 (INeighborhoodNodeIDMessage my_id)
+                    args.add(prepare_argument_object(arg3));
+                }
+                {
+                    // serialize arg4 (string my_mac)
+                    args.add(prepare_argument_string(arg4));
+                }
+                {
+                    // serialize arg5 (string my_nic_addr)
+                    args.add(prepare_argument_string(arg5));
                 }
 
                 string resp;
@@ -447,12 +460,6 @@ namespace Netsukuku
                 if (error_domain != null)
                 {
                     string error_domain_code = @"$(error_domain).$(error_code)";
-                    if (error_domain_code == "NeighborhoodRequestArcError.TOO_MANY_ARCS")
-                        throw new NeighborhoodRequestArcError.TOO_MANY_ARCS(error_message);
-                    if (error_domain_code == "NeighborhoodRequestArcError.TWO_ARCS_ON_COLLISION_DOMAIN")
-                        throw new NeighborhoodRequestArcError.TWO_ARCS_ON_COLLISION_DOMAIN(error_message);
-                    if (error_domain_code == "NeighborhoodRequestArcError.GENERIC")
-                        throw new NeighborhoodRequestArcError.GENERIC(error_message);
                     if (error_domain_code == "DeserializeError.GENERIC")
                         throw new DeserializeError.GENERIC(error_message);
                     throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
@@ -460,21 +467,73 @@ namespace Netsukuku
                 return;
             }
 
-            public void remove_arc(INeighborhoodNodeIDMessage arg0, string arg1, string arg2) throws StubError, DeserializeError
+            public bool can_you_export(bool arg0) throws StubError, DeserializeError
+            {
+                string m_name = "addr.neighborhood_manager.can_you_export";
+                ArrayList<string> args = new ArrayList<string>();
+                {
+                    // serialize arg0 (bool i_can_export)
+                    args.add(prepare_argument_boolean(arg0));
+                }
+
+                string resp;
+                try {
+                    resp = rmt(m_name, args);
+                }
+                catch (ZCDError e) {
+                    throw new StubError.GENERIC(e.message);
+                }
+
+                // deserialize response
+                string? error_domain = null;
+                string? error_code = null;
+                string? error_message = null;
+                string doing = @"Reading return-value of $(m_name)";
+                bool ret;
+                try {
+                    ret = read_return_value_bool_notnull(resp, out error_domain, out error_code, out error_message);
+                } catch (HelperNotJsonError e) {
+                    error(@"Error parsing JSON for return-value of $(m_name): $(e.message)");
+                } catch (HelperDeserializeError e) {
+                    throw new DeserializeError.GENERIC(@"$(doing): $(e.message)");
+                }
+                if (error_domain != null)
+                {
+                    string error_domain_code = @"$(error_domain).$(error_code)";
+                    if (error_domain_code == "DeserializeError.GENERIC")
+                        throw new DeserializeError.GENERIC(error_message);
+                    throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
+                }
+                return ret;
+            }
+
+            public void remove_arc(INeighborhoodNodeIDMessage arg0, string arg1, string arg2, INeighborhoodNodeIDMessage arg3, string arg4, string arg5) throws StubError, DeserializeError
             {
                 string m_name = "addr.neighborhood_manager.remove_arc";
                 ArrayList<string> args = new ArrayList<string>();
                 {
-                    // serialize arg0 (INeighborhoodNodeIDMessage my_id)
+                    // serialize arg0 (INeighborhoodNodeIDMessage your_id)
                     args.add(prepare_argument_object(arg0));
                 }
                 {
-                    // serialize arg1 (string mac)
+                    // serialize arg1 (string your_mac)
                     args.add(prepare_argument_string(arg1));
                 }
                 {
-                    // serialize arg2 (string nic_addr)
+                    // serialize arg2 (string your_nic_addr)
                     args.add(prepare_argument_string(arg2));
+                }
+                {
+                    // serialize arg3 (INeighborhoodNodeIDMessage my_id)
+                    args.add(prepare_argument_object(arg3));
+                }
+                {
+                    // serialize arg4 (string my_mac)
+                    args.add(prepare_argument_string(arg4));
+                }
+                {
+                    // serialize arg5 (string my_nic_addr)
+                    args.add(prepare_argument_string(arg5));
                 }
 
                 string resp;

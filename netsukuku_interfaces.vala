@@ -21,9 +21,10 @@ interfaces.rpcidl
 ==========================================
 AddressManager addr
  NeighborhoodManager neighborhood_manager
-  void here_i_am(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr)
-  void request_arc(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr) throws NeighborhoodRequestArcError
-  void remove_arc(INeighborhoodNodeIDMessage my_id, string mac, string nic_addr)
+  void here_i_am(INeighborhoodNodeIDMessage my_id, string my_mac, string my_nic_addr)
+  void request_arc(INeighborhoodNodeIDMessage your_id, string your_mac, string your_nic_addr, INeighborhoodNodeIDMessage my_id, string my_mac, string my_nic_addr)
+  bool can_you_export(bool i_can_export)
+  void remove_arc(INeighborhoodNodeIDMessage your_id, string your_mac, string your_nic_addr, INeighborhoodNodeIDMessage my_id, string my_mac, string my_nic_addr)
   void nop()
  IdentityManager identity_manager
   IDuplicationData? match_duplication(int migration_id, IIdentityID peer_id, IIdentityID old_id, IIdentityID new_id, string old_id_new_mac, string old_id_new_linklocal)
@@ -65,7 +66,6 @@ AddressManager addr
   void route_mig_request(IRequestPacket p0)
   void route_mig_response(IResponsePacket p1)
 Errors
- NeighborhoodRequestArcError(TOO_MANY_ARCS,TWO_ARCS_ON_COLLISION_DOMAIN,GENERIC)
  QspnNotAcceptedError(GENERIC)
  QspnBootstrapInProgressError(GENERIC)
  PeersUnknownMessageError(GENERIC)
@@ -82,12 +82,6 @@ using zcd;
 
 namespace Netsukuku
 {
-    public errordomain NeighborhoodRequestArcError {
-        TOO_MANY_ARCS,
-        TWO_ARCS_ON_COLLISION_DOMAIN,
-        GENERIC,
-    }
-
     public errordomain QspnNotAcceptedError {
         GENERIC,
     }
