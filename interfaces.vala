@@ -1,6 +1,6 @@
 /*
  *  This file is part of Netsukuku.
- *  (c) Copyright 2015-2016 Luca Dionisi aka lukisi <luca.dionisi@gmail.com>
+ *  (c) Copyright 2018 Luca Dionisi aka lukisi <luca.dionisi@gmail.com>
  *
  *  Netsukuku is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -78,7 +78,6 @@ Errors
  */
 
 using Gee;
-using zcd;
 
 namespace Netsukuku
 {
@@ -203,6 +202,10 @@ namespace Netsukuku
     }
 
     public interface ISourceID : Object
+    {
+    }
+
+    public interface ISrcNic : Object
     {
     }
 

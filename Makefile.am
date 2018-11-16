@@ -36,11 +36,14 @@ libhelperrpc_la_LIBADD = \
 	$(NULL)
 
 libntkdrpc_la_SOURCES = \
+	interfaces.vala \
+	api.vala \
+	caller_info.vala \
+	tasklet_system.vala \
 	common_skeleton.vala \
 	common_stub.vala \
-	netsukuku_interfaces.vala \
-	netsukuku_skeleton.vala \
-	netsukuku_stub.vala \
+	addr_skeleton.vala \
+	addr_stub.vala \
 	helperrpc.vapi \
 	$(NULL)
 

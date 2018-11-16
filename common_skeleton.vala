@@ -1,6 +1,6 @@
 /*
  *  This file is part of Netsukuku.
- *  (c) Copyright 2015-2016 Luca Dionisi aka lukisi <luca.dionisi@gmail.com>
+ *  (c) Copyright 2018 Luca Dionisi aka lukisi <luca.dionisi@gmail.com>
  *
  *  Netsukuku is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,272 +18,248 @@
 
 using Gee;
 using TaskletSystem;
-using zcd;
 
 namespace Netsukuku
 {
-        internal ITasklet tasklet;
-
-        public void init_tasklet_system(ITasklet _tasklet)
+    internal class ErrorHandler : Object, zcd.IErrorHandler
+    {
+        private IErrorHandler err;
+        private string? key_datagram_listening;
+        public ErrorHandler(IErrorHandler err, string? key_datagram_listening = null)
         {
-            zcd.init_tasklet_system(_tasklet);
-            tasklet = _tasklet;
+            this.err = err;
+            this.key_datagram_listening = key_datagram_listening;
         }
 
-        public interface IRpcErrorHandler : Object
+        public void error_handler(Error e)
         {
-            public abstract void error_handler(Error e);
+            if (map_datagram_listening != null && key_datagram_listening != null)
+                map_datagram_listening.unset(key_datagram_listening);
+            err.error_handler(e);
+        }
+    }
+
+    internal class ListenerHandle : Object, IListenerHandle
+    {
+        private zcd.IListenerHandle lh;
+        private string? key_datagram_listening;
+        public ListenerHandle(zcd.IListenerHandle lh, string? key_datagram_listening = null)
+        {
+            this.lh = lh;
+            this.key_datagram_listening = key_datagram_listening;
         }
 
-        public abstract class CallerInfo : Object
+        public void kill()
         {
+            lh.kill();
+            if (map_datagram_listening != null && key_datagram_listening != null)
+                map_datagram_listening.unset(key_datagram_listening);
+        }
+    }
+
+    internal class StreamDelegate : Object, zcd.IStreamDelegate
+    {
+        public StreamDelegate(IDelegate dlg)
+        {
+            this.dlg = dlg;
+        }
+        private IDelegate dlg;
+
+        public zcd.IStreamDispatcher? get_dispatcher(zcd.StreamCallerInfo caller_info)
+        {
+            StreamCallerInfo mod_caller_info;
+            try {
+                mod_caller_info = new StreamCallerInfo(caller_info);
+            } catch (HelperDeserializeError e) {
+                warning(@"Error deserializing parts of zcd.StreamCallerInfo: $(e.message)");
+                tasklet.exit_tasklet();
+            }
+            if (mod_caller_info.m_name.has_prefix("addr."))
+            {
+                Gee.List<IAddressManagerSkeleton> addr_set = dlg.get_addr_set(mod_caller_info);
+                if (addr_set.is_empty) return null;
+                assert(addr_set.size == 1);
+                return new AddressManagerStreamDispatcher(addr_set[0]);
+            }
+            else
+            {
+                return new StreamDispatcherForError("DeserializeError", "GENERIC", @"Unknown root in method name: \"$(mod_caller_info.m_name)\"");
+            }
+        }
+    }
+
+    internal class StreamDispatcherForError : Object, zcd.IStreamDispatcher
+    {
+        private string domain;
+        private string code;
+        private string message;
+        public StreamDispatcherForError(string domain, string code, string message)
+        {
+            this.domain = domain;
+            this.code = code;
+            this.message = message;
         }
 
-        internal const string s_unicast_service_prefix_response = "RESPONSE:";
-        internal const string s_unicast_service_prefix_fail = "FAIL:";
-        internal const int udp_timeout_msec = 3000;
-        internal HashMap<string, ZcdUdpServiceMessageDelegate>? map_udp_listening = null;
-        internal class ZcdUdpServiceMessageDelegate : Object, IZcdUdpServiceMessageDelegate
+        public string execute(string m_name, Gee.List<string> args, zcd.StreamCallerInfo caller_info)
         {
-            public ZcdUdpServiceMessageDelegate()
-            {
-                waiting_for_response = new HashMap<int, WaitingForResponse>();
-                waiting_for_ack = new HashMap<int, WaitingForAck>();
-                waiting_for_recv = new HashMap<int, WaitingForRecv>();
-            }
+            return prepare_error(domain, code, message);
+        }
+    }
 
-            private class WaitingForResponse : Object, ITaskletSpawnable
-            {
-                public WaitingForResponse(ZcdUdpServiceMessageDelegate parent, int id, Timer timer, IChannel ch)
-                {
-                    this.parent = parent;
-                    this.id = id;
-                    this.timer = timer;
-                    this.ch = ch;
-                    has_response = false;
-                }
-                private ZcdUdpServiceMessageDelegate parent;
-                private int id;
-                public Timer timer;
-                private IChannel ch;
-                public string response;
-                public bool has_response;
-                public void* func()
-                {
-                    while (true)
-                    {
-                        if (has_response)
-                        {
-                            // report 'response' through 'ch'
-                            ch.send_async(s_unicast_service_prefix_response + response);
-                            parent.waiting_for_response.unset(id);
-                            return null;
-                        }
-                        if (timer.is_expired())
-                        {
-                            // report communication error through 'ch'
-                            ch.send_async(s_unicast_service_prefix_fail + "Timeout before reply or keepalive");
-                            parent.waiting_for_response.unset(id);
-                            return null;
-                        }
-                        tasklet.ms_wait(2);
-                    }
-                }
-            }
-            private HashMap<int, WaitingForResponse> waiting_for_response;
+    internal const int ack_timeout_msec = 3000;
+    internal HashMap<string, DatagramDelegate>? map_datagram_listening = null;
+    internal class DatagramDelegate : Object, zcd.IDatagramDelegate
+    {
+        public DatagramDelegate(IDelegate dlg)
+        {
+            this.dlg = dlg;
+            waiting_for_ack = new HashMap<int, WaitingForAck>();
+            waiting_for_recv = new HashMap<int, WaitingForRecv>();
+        }
+        private IDelegate dlg;
 
-            private class WaitingForAck : Object, ITaskletSpawnable
+        private class WaitingForAck : Object, ITaskletSpawnable
+        {
+            public WaitingForAck(DatagramDelegate parent, int packet_id, IChannel ch)
             {
-                public WaitingForAck(ZcdUdpServiceMessageDelegate parent, int id, int timeout_msec, IChannel ch)
-                {
-                    this.parent = parent;
-                    this.id = id;
-                    this.timeout_msec = timeout_msec;
-                    this.ch = ch;
-                    macs_list = new ArrayList<string>();
-                }
-                private ZcdUdpServiceMessageDelegate parent;
-                private int id;
-                private int timeout_msec;
-                private IChannel ch;
-                public ArrayList<string> macs_list {get; private set;}
-                public void* func()
-                {
-                    tasklet.ms_wait(timeout_msec);
-                    // report 'macs_list' through 'ch'
-                    ch.send_async(macs_list);
-                    parent.waiting_for_ack.unset(id);
-                    return null;
-                }
+                this.parent = parent;
+                this.packet_id = packet_id;
+                this.ch = ch;
+                src_nics_list = new ArrayList<string>();
             }
-            private HashMap<int, WaitingForAck> waiting_for_ack;
-
-            private class WaitingForRecv : Object, ITaskletSpawnable
+            private DatagramDelegate parent;
+            private int packet_id;
+            private IChannel ch;
+            public ArrayList<string> src_nics_list {get; private set;}
+            public void* func()
             {
-                public WaitingForRecv(ZcdUdpServiceMessageDelegate parent, int id, int timeout_msec)
-                {
-                    this.parent = parent;
-                    this.id = id;
-                    this.timeout_msec = timeout_msec;
-                }
-                private ZcdUdpServiceMessageDelegate parent;
-                private int id;
-                private int timeout_msec;
-                public void* func()
-                {
-                    tasklet.ms_wait(timeout_msec);
-                    parent.waiting_for_recv.unset(id);
-                    return null;
-                }
+                tasklet.ms_wait(ack_timeout_msec);
+                // report 'src_nics_list' through 'ch'
+                ch.send_async(src_nics_list);
+                parent.waiting_for_ack.unset(packet_id);
+                return null;
             }
-            private HashMap<int, WaitingForRecv> waiting_for_recv;
+        }
+        private HashMap<int, WaitingForAck> waiting_for_ack;
 
-            internal void going_to_send_unicast_with_reply(int id, IChannel ch)
+        private class WaitingForRecv : Object, ITaskletSpawnable
+        {
+            public WaitingForRecv(DatagramDelegate parent, int packet_id)
             {
-                var w = new WaitingForResponse(this, id, new Timer(udp_timeout_msec), ch);
-                tasklet.spawn(w);
-                waiting_for_response[id] = w;
+                this.parent = parent;
+                this.packet_id = packet_id;
             }
-
-            internal void going_to_send_broadcast_with_ack(int id, IChannel ch)
+            private DatagramDelegate parent;
+            private int packet_id;
+            public void* func()
             {
-                var w = new WaitingForAck(this, id, udp_timeout_msec, ch);
-                tasklet.spawn(w);
-                waiting_for_ack[id] = w;
+                tasklet.ms_wait(ack_timeout_msec);
+                parent.waiting_for_recv.unset(packet_id);
+                return null;
             }
+        }
+        private HashMap<int, WaitingForRecv> waiting_for_recv;
 
-            internal void going_to_send_unicast_no_reply(int id)
-            {
-                var w = new WaitingForRecv(this, id, udp_timeout_msec);
-                tasklet.spawn(w);
-                waiting_for_recv[id] = w;
-            }
+        internal void going_to_send_broadcast_with_ack(int packet_id, IChannel ch)
+        {
+            var w = new WaitingForAck(this, packet_id, ch);
+            tasklet.spawn(w);
+            waiting_for_ack[packet_id] = w;
+        }
 
-            internal void going_to_send_broadcast_no_ack(int id)
-            {
-                var w = new WaitingForRecv(this, id, udp_timeout_msec);
-                tasklet.spawn(w);
-                waiting_for_recv[id] = w;
-            }
+        internal void going_to_send_broadcast_no_ack(int packet_id)
+        {
+            var w = new WaitingForRecv(this, packet_id);
+            tasklet.spawn(w);
+            waiting_for_recv[packet_id] = w;
+        }
 
-            public bool is_my_own_message(int id)
+        public void got_ack(int packet_id, string src_nic)
+        {
+            if (waiting_for_ack.has_key(packet_id))
             {
-                if (waiting_for_response.has_key(id)) return true;
-                if (waiting_for_ack.has_key(id)) return true;
-                if (waiting_for_recv.has_key(id)) return true;
-                return false;
-            }
-
-            public void got_keep_alive(int id)
-            {
-                if (waiting_for_response.has_key(id))
-                {
-                    waiting_for_response[id].timer = new Timer(udp_timeout_msec);
-                }
-            }
-
-            public void got_response(int id, string response)
-            {
-                if (waiting_for_response.has_key(id))
-                {
-                    waiting_for_response[id].response = response;
-                    waiting_for_response[id].has_response = true;
-                }
-            }
-
-            public void got_ack(int id, string mac)
-            {
-                if (waiting_for_ack.has_key(id))
-                {
-                    if (! (mac in waiting_for_ack[id].macs_list))
-                        waiting_for_ack[id].macs_list.add(mac);
-                }
+                if (! (src_nic in waiting_for_ack[packet_id].src_nics_list))
+                    waiting_for_ack[packet_id].src_nics_list.add(src_nic);
             }
         }
 
-        internal class ZcdTcpAcceptErrorHandler : Object, IZcdTcpAcceptErrorHandler
+        public bool is_my_own_message(int packet_id)
         {
-            private IRpcErrorHandler err;
-            public ZcdTcpAcceptErrorHandler(IRpcErrorHandler err)
-            {
-                this.err = err;
-            }
-
-            public void error_handler(Error e)
-            {
-                err.error_handler(e);
-            }
+            if (waiting_for_ack.has_key(packet_id)) return true;
+            if (waiting_for_recv.has_key(packet_id)) return true;
+            return false;
         }
 
-        internal class ZcdUdpCreateErrorHandler : Object, IZcdUdpCreateErrorHandler
+        public zcd.IDatagramDispatcher? get_dispatcher(zcd.DatagramCallerInfo caller_info)
         {
-            private IRpcErrorHandler err;
-            private string k_map;
-            public ZcdUdpCreateErrorHandler(IRpcErrorHandler err, string k_map)
-            {
-                this.err = err;
-                this.k_map = k_map;
+            DatagramCallerInfo mod_caller_info;
+            try {
+                mod_caller_info = new DatagramCallerInfo(caller_info);
+            } catch (HelperDeserializeError e) {
+                warning(@"Error deserializing parts of zcd.DatagramCallerInfo: $(e.message)");
+                tasklet.exit_tasklet();
             }
-
-            public void error_handler(Error e)
+            if (mod_caller_info.m_name.has_prefix("addr."))
             {
-                if (map_udp_listening != null)
-                    map_udp_listening.unset(k_map);
-                err.error_handler(e);
+                Gee.List<IAddressManagerSkeleton> addr_set = dlg.get_addr_set(mod_caller_info);
+                if (addr_set.is_empty) return null;
+                else return new AddressManagerDatagramDispatcher(addr_set);
+            }
+            else
+            {
+                return new DatagramDispatcherForError(); // or just terminate this tasklet
             }
         }
+    }
 
-        internal class ZcdDispatcherForError : Object, IZcdDispatcher
+    internal class DatagramDispatcherForError : Object, zcd.IDatagramDispatcher
+    {
+        public void execute(string m_name, Gee.List<string> args, zcd.DatagramCallerInfo caller_info)
         {
-            private string domain;
-            private string code;
-            private string message;
-            public ZcdDispatcherForError(string domain, string code, string message)
-            {
-                this.domain = domain;
-                this.code = code;
-                this.message = message;
-            }
-
-            public string execute()
-            {
-                return prepare_error(domain, code, message);
-            }
         }
+    }
 
-        internal class Timer : Object
-        {
-            protected TimeVal exp;
-            public Timer(int64 msec_ttl)
-            {
-                set_time(msec_ttl);
-            }
+    internal errordomain InSkeletonDeserializeError {
+        GENERIC
+    }
 
-            protected void set_time(int64 msec_ttl)
-            {
-                exp = TimeVal();
-                exp.get_current_time();
-                long milli = (long)(msec_ttl % (int64)1000);
-                long seconds = (long)(msec_ttl / (int64)1000);
-                int64 check_seconds = (int64)exp.tv_sec;
-                check_seconds += (int64)seconds;
-                assert(check_seconds <= long.MAX);
-                exp.add(milli*1000);
-                exp.tv_sec += seconds;
-            }
+    public IListenerHandle stream_net_listen(IDelegate dlg, IErrorHandler err, string my_ip, uint16 tcp_port)
+    {
+        zcd.IListenerHandle lh =
+            zcd.stream_net_listen(my_ip, tcp_port, new StreamDelegate(dlg), new ErrorHandler(err));
+        return new ListenerHandle(lh);
+    }
 
-            public bool is_younger(Timer t)
-            {
-                if (exp.tv_sec > t.exp.tv_sec) return true;
-                if (exp.tv_sec < t.exp.tv_sec) return false;
-                if (exp.tv_usec > t.exp.tv_usec) return true;
-                return false;
-            }
+    public IListenerHandle stream_system_listen(IDelegate dlg, IErrorHandler err, string listen_pathname)
+    {
+        zcd.IListenerHandle lh =
+            zcd.stream_system_listen(listen_pathname, new StreamDelegate(dlg), new ErrorHandler(err));
+        return new ListenerHandle(lh);
+    }
 
-            public bool is_expired()
-            {
-                Timer now = new Timer(0);
-                return now.is_younger(this);
-            }
-        }
+    public IListenerHandle datagram_net_listen(IDelegate dlg, IErrorHandler err, string my_dev, uint16 udp_port, ISrcNic src_nic)
+    {
+        string s_src_nic = prepare_direct_object(src_nic);
+        if (map_datagram_listening == null)
+            map_datagram_listening = new HashMap<string, DatagramDelegate>();
+        DatagramDelegate datagram_dlg = new DatagramDelegate(dlg);
+        string key = @"$(my_dev):$(udp_port)";
+        map_datagram_listening[key] = datagram_dlg;
+        zcd.IListenerHandle lh =
+            zcd.datagram_net_listen(my_dev, udp_port, s_src_nic, datagram_dlg, new ErrorHandler(err, key));
+        return new ListenerHandle(lh, key);
+    }
+
+    public IListenerHandle datagram_system_listen(IDelegate dlg, IErrorHandler err, string listen_pathname, string send_pathname, ISrcNic src_nic)
+    {
+        string s_src_nic = prepare_direct_object(src_nic);
+        if (map_datagram_listening == null)
+            map_datagram_listening = new HashMap<string, DatagramDelegate>();
+        DatagramDelegate datagram_dlg = new DatagramDelegate(dlg);
+        string key = @"$(send_pathname)";
+        map_datagram_listening[key] = datagram_dlg;
+        zcd.IListenerHandle lh =
+            zcd.datagram_system_listen(listen_pathname, send_pathname, s_src_nic, datagram_dlg, new ErrorHandler(err, key));
+        return new ListenerHandle(lh, key);
+    }
 }

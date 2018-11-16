@@ -1,37 +1,48 @@
-# Fai un commit per tornare facilmente indietro
-bzr commit
+# From a clean working dir
 
 cd build_sources
 rpcdesign
 
-diff -u sample_interfaces.vala ../netsukuku_interfaces.vala > sample_interfaces.diff
-diff -u sample_skeleton.vala ../netsukuku_skeleton.vala > sample_skeleton.diff
-diff -u sample_stub.vala ../netsukuku_stub.vala > sample_stub.diff
+diff -u common_helpers.vala ../common_helpers.vala > common_helpers.diff
+diff -u interfaces.vala ../interfaces.vala > interfaces.diff
+diff -u api.vala ../api.vala > api.diff
+diff -u caller_info.vala ../caller_info.vala > caller_info.diff
+diff -u tasklet_system.vala ../tasklet_system.vala > tasklet_system.diff
 diff -u common_skeleton.vala ../common_skeleton.vala > common_skeleton.diff
 diff -u common_stub.vala ../common_stub.vala > common_stub.diff
-diff -u common_helpers.vala ../common_helpers.vala > common_helpers.diff
+diff -u addr_skeleton.vala ../addr_skeleton.vala > addr_skeleton.diff
+diff -u addr_stub.vala ../addr_stub.vala > addr_stub.diff
 
-# Apporta correzioni al rpcidl
+# Make your changes to rpcidl
 gedit interfaces.rpcidl
 rpcdesign
 
-patch sample_interfaces.vala sample_interfaces.diff
-cp sample_interfaces.vala ../netsukuku_interfaces.vala
-
-patch sample_skeleton.vala sample_skeleton.diff
-cp sample_skeleton.vala ../netsukuku_skeleton.vala
-
-patch sample_stub.vala sample_stub.diff
-cp sample_stub.vala ../netsukuku_stub.vala
-
 patch common_helpers.vala common_helpers.diff
 cp common_helpers.vala ../common_helpers.vala
+
+patch interfaces.vala interfaces.diff
+cp interfaces.vala ../interfaces.vala
+
+patch api.vala api.diff
+cp api.vala ../api.vala
+
+patch caller_info.vala caller_info.diff
+cp caller_info.vala ../caller_info.vala
+
+patch tasklet_system.vala tasklet_system.diff
+cp tasklet_system.vala ../tasklet_system.vala
 
 patch common_skeleton.vala common_skeleton.diff
 cp common_skeleton.vala ../common_skeleton.vala
 
 patch common_stub.vala common_stub.diff
 cp common_stub.vala ../common_stub.vala
+
+patch addr_skeleton.vala addr_skeleton.diff
+cp addr_skeleton.vala ../addr_skeleton.vala
+
+patch addr_stub.vala addr_stub.diff
+cp addr_stub.vala ../addr_stub.vala
 
 rm *.orig
 rm *.diff
