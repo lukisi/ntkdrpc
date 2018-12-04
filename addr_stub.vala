@@ -122,7 +122,6 @@ namespace Netsukuku
 
     public IAddressManagerStub get_addr_datagram_net(
         string my_dev, uint16 udp_port,
-        int packet_id,
         ISourceID source_id, IBroadcastID broadcast_id, ISrcNic src_nic,
         IAckCommunicator? notify_ack=null)
     {
@@ -133,7 +132,6 @@ namespace Netsukuku
 
     public IAddressManagerStub get_addr_datagram_system(
         string send_pathname,
-        int packet_id,
         ISourceID source_id, IBroadcastID broadcast_id, ISrcNic src_nic,
         IAckCommunicator? notify_ack=null)
     {
