@@ -72,8 +72,8 @@ namespace Netsukuku
 
     public interface IHookingManagerSkeleton : Object
     {
-        public abstract INetworkData retrieve_network_data(bool ask_coord, CallerInfo? caller=null) throws HookingNotPrincipalError;
-        public abstract IEntryData search_migration_path(int lvl, CallerInfo? caller=null) throws NoMigrationPathFoundError, MigrationPathExecuteFailureError;
+        public abstract INetworkData retrieve_network_data(bool ask_coord, CallerInfo? caller=null) throws HookingNotPrincipalError, NotBoostrappedError;
+        public abstract IEntryData search_migration_path(int lvl, CallerInfo? caller=null) throws NoMigrationPathFoundError, MigrationPathExecuteFailureError, NotBoostrappedError;
         public abstract void route_search_request(ISearchMigrationPathRequest p0, CallerInfo? caller=null);
         public abstract void route_search_error(ISearchMigrationPathErrorPkt p2, CallerInfo? caller=null);
         public abstract void route_search_response(ISearchMigrationPathResponse p1, CallerInfo? caller=null);
@@ -2102,6 +2102,11 @@ namespace Netsukuku
                         if (e is HookingNotPrincipalError.GENERIC) code = "GENERIC";
                     assert(code != "");
                     ret = prepare_error("HookingNotPrincipalError", code, e.message);
+                } catch (NotBoostrappedError e) {
+                    string code = "";
+                        if (e is NotBoostrappedError.GENERIC) code = "GENERIC";
+                    assert(code != "");
+                    ret = prepare_error("NotBoostrappedError", code, e.message);
                 }
             }
             else if (m_name == "addr.hooking_manager.search_migration_path")
@@ -2146,6 +2151,11 @@ namespace Netsukuku
                         if (e is MigrationPathExecuteFailureError.GENERIC) code = "GENERIC";
                     assert(code != "");
                     ret = prepare_error("MigrationPathExecuteFailureError", code, e.message);
+                } catch (NotBoostrappedError e) {
+                    string code = "";
+                        if (e is NotBoostrappedError.GENERIC) code = "GENERIC";
+                    assert(code != "");
+                    ret = prepare_error("NotBoostrappedError", code, e.message);
                 }
             }
             else if (m_name == "addr.hooking_manager.route_search_request")
