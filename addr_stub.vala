@@ -72,8 +72,8 @@ namespace Netsukuku
 
     public interface IHookingManagerStub : Object
     {
-        public abstract INetworkData retrieve_network_data(bool ask_coord) throws HookingNotPrincipalError, NotBoostrappedError, StubError, DeserializeError;
-        public abstract IEntryData search_migration_path(int lvl) throws NoMigrationPathFoundError, MigrationPathExecuteFailureError, NotBoostrappedError, StubError, DeserializeError;
+        public abstract INetworkData retrieve_network_data(bool ask_coord) throws HookingNotPrincipalError, NotBootstrappedError, StubError, DeserializeError;
+        public abstract IEntryData search_migration_path(int lvl) throws NoMigrationPathFoundError, MigrationPathExecuteFailureError, NotBootstrappedError, StubError, DeserializeError;
         public abstract void route_search_request(ISearchMigrationPathRequest p0) throws StubError, DeserializeError;
         public abstract void route_search_error(ISearchMigrationPathErrorPkt p2) throws StubError, DeserializeError;
         public abstract void route_search_response(ISearchMigrationPathResponse p1) throws StubError, DeserializeError;
@@ -1955,7 +1955,7 @@ namespace Netsukuku
             this.rmt = rmt;
         }
 
-        public INetworkData retrieve_network_data(bool arg0) throws HookingNotPrincipalError, NotBoostrappedError, StubError, DeserializeError
+        public INetworkData retrieve_network_data(bool arg0) throws HookingNotPrincipalError, NotBootstrappedError, StubError, DeserializeError
         {
             string m_name = "addr.hooking_manager.retrieve_network_data";
             ArrayList<string> args = new ArrayList<string>();
@@ -1990,8 +1990,8 @@ namespace Netsukuku
                 string error_domain_code = @"$(error_domain).$(error_code)";
                 if (error_domain_code == "HookingNotPrincipalError.GENERIC")
                     throw new HookingNotPrincipalError.GENERIC(error_message);
-                if (error_domain_code == "NotBoostrappedError.GENERIC")
-                    throw new NotBoostrappedError.GENERIC(error_message);
+                if (error_domain_code == "NotBootstrappedError.GENERIC")
+                    throw new NotBootstrappedError.GENERIC(error_message);
                 if (error_domain_code == "DeserializeError.GENERIC")
                     throw new DeserializeError.GENERIC(error_message);
                 throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");
@@ -2003,7 +2003,7 @@ namespace Netsukuku
         }
 
 
-        public IEntryData search_migration_path(int arg0) throws NoMigrationPathFoundError, MigrationPathExecuteFailureError, NotBoostrappedError, StubError, DeserializeError
+        public IEntryData search_migration_path(int arg0) throws NoMigrationPathFoundError, MigrationPathExecuteFailureError, NotBootstrappedError, StubError, DeserializeError
         {
             string m_name = "addr.hooking_manager.search_migration_path";
             ArrayList<string> args = new ArrayList<string>();
@@ -2040,8 +2040,8 @@ namespace Netsukuku
                     throw new NoMigrationPathFoundError.GENERIC(error_message);
                 if (error_domain_code == "MigrationPathExecuteFailureError.GENERIC")
                     throw new MigrationPathExecuteFailureError.GENERIC(error_message);
-                if (error_domain_code == "NotBoostrappedError.GENERIC")
-                    throw new NotBoostrappedError.GENERIC(error_message);
+                if (error_domain_code == "NotBootstrappedError.GENERIC")
+                    throw new NotBootstrappedError.GENERIC(error_message);
                 if (error_domain_code == "DeserializeError.GENERIC")
                     throw new DeserializeError.GENERIC(error_message);
                 throw new DeserializeError.GENERIC(@"$(doing): unrecognized error $(error_domain_code) $(error_message)");

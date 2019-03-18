@@ -55,8 +55,8 @@ AddressManager addr
   void execute_finish_enter(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject finish_enter_data)
   void execute_we_have_splitted(ICoordTupleGNode tuple, int64 fp_id, int propagation_id, int lvl, ICoordObject we_have_splitted_data)
  HookingManager hooking_manager
-  INetworkData retrieve_network_data(bool ask_coord) throws HookingNotPrincipalError, NotBoostrappedError
-  IEntryData search_migration_path(int lvl) throws NoMigrationPathFoundError, MigrationPathExecuteFailureError, NotBoostrappedError
+  INetworkData retrieve_network_data(bool ask_coord) throws HookingNotPrincipalError, NotBootstrappedError
+  IEntryData search_migration_path(int lvl) throws NoMigrationPathFoundError, MigrationPathExecuteFailureError, NotBootstrappedError
   void route_search_request(ISearchMigrationPathRequest p0)
   void route_search_error(ISearchMigrationPathErrorPkt p2)
   void route_search_response(ISearchMigrationPathResponse p1)
@@ -71,7 +71,7 @@ Errors
  PeersUnknownMessageError(GENERIC)
  PeersInvalidRequest(GENERIC)
  HookingNotPrincipalError(GENERIC)
- NotBoostrappedError(GENERIC)
+ NotBootstrappedError(GENERIC)
  NoMigrationPathFoundError(GENERIC)
  MigrationPathExecuteFailureError(GENERIC)
 
@@ -102,7 +102,7 @@ namespace Netsukuku
         GENERIC,
     }
 
-    public errordomain NotBoostrappedError {
+    public errordomain NotBootstrappedError {
         GENERIC,
     }
 
